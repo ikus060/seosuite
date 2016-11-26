@@ -31,7 +31,7 @@ def fetch_run(run_id, page=1, page_length=default_page_length):
     start = (page - 1) * page_length
     c.execute('SELECT * FROM crawl_urls WHERE run_id = %s AND external = 0 ORDER BY timestamp ASC LIMIT %s, %s',
         [run_id, start, page_length])
-    return c.fetchall()
+    return cols_to_props(c)
 
 
 def fetch_run_count(run_id):
@@ -49,55 +49,13 @@ def fetch_run_ids():
 def fetch_url(url_id):
     c = db.cursor()
     c.execute('SELECT * FROM crawl_urls WHERE id = %s', [url_id])
-    return c.fetchall()
+    return cols_to_props(c)
 
-def cols_to_props(results):
+def cols_to_props(c):
     output = []
-    for result in results:
-        output.append({
-            'id':           result[0],
-            'run_id':       result[1],
-            'level':        result[2],
-            'content_hash': result[3],
-
-            'address':        result[4],
-            'domain':         result[5],
-            'path':           result[6],
-            'external':       result[7],
-            'status_code':    result[8],
-            'status':         result[9],
-            'body':           result[10],
-            'size':           result[11],
-            'address_length': result[12],
-            'encoding':       result[13],
-            'content_type':   result[14],
-            'response_time':  result[15],
-            'redirect_uri':   result[16],
-
-            'canonical':                      result[17],
-            'title_1':                        result[18],
-            'title_length_1':                 result[19],
-            'title_occurences_1':             result[20],
-            'meta_description_1':             result[21],
-            'meta_description_length_1':      result[22],
-            'meta_description_occurrences_1': result[23],
-            'h1_1':                           result[24],
-            'h1_length_1':                    result[25],
-            'h1_2':                           result[26],
-            'h1_length_2':                    result[27],
-            'h1_count':                       result[28],
-            'meta_robots':                    result[29],
-            'rel_next':                       result[30],
-            'rel_prev':                       result[31],
-
-            'lint_critical': result[32],
-            'lint_error':    result[33],
-            'lint_warn':     result[34],
-            'lint_info':     result[35],
-            'lint_results':  result[36],
-
-            'timestamp': result[37],
-            })
+    descriptions = [t[0] for t in c.description]
+    for result in c.fetchall():
+        output.append(dict(zip(descriptions, result)))
     return output
 
 @app.route("/")
@@ -116,7 +74,7 @@ def hello():
     return render_template('index.html',
         run_id=run_id,
         run_ids=run_ids,
-        crawl_urls=cols_to_props(crawl_urls),
+        crawl_urls=crawl_urls,
         prev_page=(page - 1 if page > 1 else None),
         next_page=(page + 1 if page < crawl_url_count/page_length else None),
         )
@@ -129,7 +87,7 @@ def url_page():
     
     print [url_id]
     
-    url = cols_to_props(crawl_urls)[0]
+    url = crawl_urls[0]
     lint_results = json.loads(url.get('lint_results'))
     lint_desc = {t[0]: t[1] for t in seolinter.rules}
     lint_level = {t[0]: t[2] for t in seolinter.rules}
