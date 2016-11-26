@@ -5,13 +5,9 @@
     <div class="table-responsive">
         <table class="table table-striped table-condensed">
             <thead>
-                <th>id</th>
                 <th>domain</th>
                 <th>path</th>
                 <th>status code</th>
-
-                <th colspan="4">links</th>
-
                 <th>title</th>
                 <th>canonical</th>
                 <th>description</th>
@@ -19,21 +15,19 @@
                 <th>next</th>
                 <th>prev</th>
                 <th>size</th>
-                <th colspan="3">lint errors<br>CRIT|ERR|WARN</th>
             </thead>
 
             {% for url in crawl_urls %}
                 <tr>
-                    <td>{{ url.id }}</td>
                     <td>{{ url.domain }}</td>
-                    <td>{{ url.path }}</td>
+                    <td>
+                    	<a href="/url?url_id={{ url.id }}">{{ url.path }}</a>
+                    	{% if url.lint_info %}<span class="label label-success">{{ url.lint_info }}</span>{% endif %}
+						{% if url.lint_warn %}<span class="label label-info">{{ url.lint_warn }}</span>{% endif %}
+						{% if url.lint_error %}<span class="label label-warning">{{ url.lint_error }}</span>{% endif %}
+						{% if url.lint_critical %}<span class="label label-danger">{{ url.lint_critical }}</span>{% endif %}
+                    </td>
                     <td>{{ url.status_code }}</td>
-
-                    <td><a href="{{ url.bot_url }}">bot</a></td>
-                    <td><a href="{{ url.local_url }}">local</a></td>
-                    <td><a href="{{ url.origin_url }}">origin</a></td>
-                    <td><a href="{{ url.live_url }}">live</a></td>
-
                     <td class="{{ url.title_1 }}">{{ url.title_1 }}</td>
                     <td class="{{ url.canonical }}">{{ url.canonical }}</td>
                     <td class="{{ url.meta_description_1 }}">{{ url.meta_description_1 }}</td>
@@ -41,9 +35,6 @@
                     <td class="{{ url.rel_next }}">{{ url.rel_next }}</td>
                     <td class="{{ url.rel_prev }}">{{ url.rel_prev }}</td>
                     <td class="{{ url.size }}">{{ url.size }}</td>
-                    <td class="{{ url.lint_critical }}">{{ url.lint_critical }}</td>
-                    <td class="{{ url.lint_error }}">{{ url.lint_error }}</td>
-                    <td class="{{ url.lint_warn }}">{{ url.lint_warn }}</td>
                 </tr>
             {% endfor %}
         </table>

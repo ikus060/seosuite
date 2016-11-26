@@ -1,0 +1,168 @@
+{% extends "common.html" %}
+{% block title %}{{ url.path }}{% endblock %}
+{% block content %}
+	
+<h2>{{ url.path }}</h2>
+
+<div class="panel panel-default">
+<div class="panel-body">
+<div class="row">
+	<div class="col-sm-3">
+	<!-- Info -->
+	<b>Information <span class="badge">{{ url.lint_info }}</span></b>
+	<div class="progress">
+	  <div class="progress-bar progress-bar-success progress-bar-striped" role="progressbar" style="width: {{ url.lint_info / 10 * 100 + 1 }}%">
+	    <span class="sr-only">{{ url.lint_info }} info</span>
+	  </div>
+	</div>
+	</div>
+	
+	<!-- Warning -->
+	<div class="col-sm-3">
+	<b>Warning <span class="badge">{{ url.lint_warn }}</span></b>
+	<div class="progress">
+	  <div class="progress-bar progress-bar-info progress-bar-striped" role="progressbar"  style="width: {{ url.lint_warn / 10 * 100 }}%">
+	    <span class="sr-only">{{ url.lint_warn }} info</span>
+	  </div>
+	</div>
+	</div>
+
+	<!-- Error -->
+	<div class="col-sm-3">
+	<b>Error <span class="badge">{{ url.lint_error }}</span></b>
+	<div class="progress">
+	  <div class="progress-bar progress-bar-warning progress-bar-striped" role="progressbar"  style="width: {{ url.lint_error / 10 * 100 }}%">
+	    <span class="sr-only">{{ url.lint_error }} info</span>
+	  </div>
+	</div>
+	</div>
+
+	<!-- Critical -->
+	<div class="col-sm-3">
+	<b>Critical <span class="badge">{{ url.lint_critical }}</span></b>
+	<div class="progress">
+	  <div class="progress-bar progress-bar-danger progress-bar-striped" role="progressbar" style="width: {{ url.lint_critical / 10 * 100 }}%">
+	    <span class="sr-only">{{ url.lint_critical }} info</span>
+	  </div>
+	</div>
+	</div>
+</div>
+</div>
+</div>
+
+<div class="panel panel-default">
+<div class="panel-heading"><h3 class="panel-title">Summary</h3></div>
+<div class="panel-body">
+<dl class="dl-horizontal">
+  
+    <dt>Title</dt>
+    <dd>{{ url.title_1 }}</dd>
+  
+	<dt>Heading</dt>
+	<dd>{{ url.h1_1 }}{% if url.h1_2 %}<br/>{{ url.h1_2 }}{% endif %}</dd>
+  
+	<dt>Meta Description</dt>
+	<dd>{{ url.meta_description_1 }}</dd>
+  
+</dl>
+</div>
+</div>
+
+<div class="panel panel-default">
+<div class="panel-heading">
+	<h3 class="panel-title">
+		<a role="button" data-toggle="collapse" href="#keywords" aria-expanded="true" aria-controls="keywords">
+		Keywords (show/hide)
+		</a>
+	</h3>
+</div>
+<div id="keywords" class="panel-collapse collapse">
+<table class="table">
+	<thead>
+		<th>Keyword</th>
+		<th>Occ.</td>
+		<th>Location</td>
+	</thead>
+    {% for keyword, occurences in keywords %}
+    {% if occurences['total'] > 1 %}
+    <tr>
+	    <td>{{ keyword }}</td>
+	    <td>{{ occurences['total'] }}</td>
+	    <td>
+	    	{% for tag in ['url', 'title', 'meta.description', 'meta.keywords', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'footer', 'a', 'b', 'img', 'default'] %}
+	    	{% if occurences[tag] %}
+	    	{{ tag }} {% if occurences[tag] > 1 %}<span class="badge">x{{ occurences[tag] }}</span>{% endif %} | 
+	    	{% endif %}
+	    	{% endfor %}
+	    </td>
+    </tr>
+    {% endif %}
+    {% endfor %}
+</table>
+</div>
+</div>
+
+<div class="panel panel-default">
+<div class="panel-heading"><h3 class="panel-title">Issues</h3></div>
+	
+	<ul class="list-group">
+	{% for level in range(0,4) %}
+	{% for key, value in lint_results.items() %}
+		{% if lint_level.get(key) == level %}
+		<li class="list-group-item">
+		<h4>
+		{% if lint_level.get(key) == 0 %}<span class="label label-danger">Citical</span>
+		{% elif lint_level.get(key) == 1 %}<span class="label label-warning">Error</span>
+		{% elif lint_level.get(key) == 2 %}<span class="label label-info">Warn</span>
+		{% elif lint_level.get(key) == 3 %}<span class="label label-success">Info</span>
+		{% endif %}
+		{{ key }} - {{ lint_desc.get(key) }}
+		</h4>
+		
+		{{ value }}
+		</li>
+		{% endif %}
+	{% endfor %}
+	{% endfor %}
+	</ul>
+</div>
+
+<div class="panel panel-default">
+<div class="panel-heading"><h3 class="panel-title">Technical details</h3></div>
+<div class="panel-body">
+<dl class="dl-horizontal">
+	<dt>Fetch Time</dt>
+	<dd>{{ url.timestamp }}</dd>
+	
+	<dt>Response Time</dt>
+	<dd>{{ url.response_time }}</dd>
+	
+	<dt>Content Size</dt>
+	<dd>{{ url.size }}</dd>
+	
+	<dt>HTTP Response</dt>
+	<dd>{{ url.status_code }} {{ url.status }}</dd>
+	
+	<dt>Level</dt>
+	<dd>{{ url.level }}</dd>
+	
+	<dt>Path</dt>
+	<dd>{{ url.path }}</dd>
+	
+	  <dt>Canonical</dt>
+	<dd>{{ url.canonical }}</dd>
+	
+	<dt>Content-Type</dt>
+	<dd>{{ url.content_type }}</dd>
+	
+	<dt>Domain</dt>
+	<dd>{{ url.domain }}</dd>
+	
+	<dt>Encoding</dt>
+	<dd>{{ url.encoding }}</dd>
+	
+</dl>
+</div>
+</div>
+
+{% endblock %}

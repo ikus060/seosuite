@@ -5,8 +5,9 @@
 # python seodashboard/main.py
 
 import yaml
-
+import json
 import MySQLdb
+import seolinter
 
 from flask import Flask, render_template, request
 app = Flask(__name__, template_folder='.', static_folder='static', static_url_path='/static')
@@ -45,6 +46,10 @@ def fetch_run_ids():
     c.execute('SELECT DISTINCT run_id FROM crawl_urls ORDER BY timestamp ASC')
     return [result[0] for result in c.fetchall()]
 
+def fetch_url(url_id):
+    c = db.cursor()
+    c.execute('SELECT * FROM crawl_urls WHERE id = %s', [url_id])
+    return c.fetchall()
 
 def cols_to_props(results):
     output = []
@@ -116,6 +121,27 @@ def hello():
         next_page=(page + 1 if page < crawl_url_count/page_length else None),
         )
 
+@app.route("/url")
+def url_page():
+    url_id = request.args.get('url_id', 1)
+    crawl_urls = fetch_url(url_id)
+    run_ids = fetch_run_ids()
+    
+    print [url_id]
+    
+    url = cols_to_props(crawl_urls)[0]
+    lint_results = json.loads(url.get('lint_results'))
+    lint_desc = {t[0]: t[1] for t in seolinter.rules}
+    lint_level = {t[0]: t[2] for t in seolinter.rules}
+
+    return render_template('url.html',
+        run_ids=run_ids,
+        url_id=url_id,
+        url=url,
+        lint_results=lint_results,
+        lint_desc=lint_desc,
+        lint_level=lint_level,
+        )
 
 if __name__ == "__main__":
     env = yaml.load(open('config.yaml'))
