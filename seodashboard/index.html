@@ -1,29 +1,6 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <title>SEO Dashboard</title>
-
-
-    <link rel="stylesheet" type="text/css" href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css">
-
-    <style>
-        .True { background-color: green; }
-        .False { background-color: red; }
-    </style>
-</head>
-<body>
-
-    <h2>Run Ids</h2>
-    <ul>
-        {% for id in run_ids %}
-            {% if id == run_id %}
-                <li><b><a href="/?run_id={{ id }}">{{ id }}</a></b></li>
-            {% else %}
-                <li><a href="/?run_id={{ id }}">{{ id }}</a></li>
-            {% endif %}
-        {% endfor %}
-    </ul>
-
+{% extends "common.html" %}
+{% block title %}Home{% endblock %}
+{% block content %}
     <h2>Crawl Data</h2>
     <div class="table-responsive">
         <table class="table table-striped table-condensed">
@@ -80,9 +57,4 @@
             <li class="btn btn-default"><a href="/?run_id={{ run_id }}&page={{ next_page }}">Next Page</a></li>
         {% endif %}
     </ul>
-
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.0/jquery.min.js"></script>
-    <script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
-
-</body>
-</html>
+{% endblock %}
