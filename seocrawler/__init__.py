@@ -398,7 +398,8 @@ def is_internal_url(url, source_url):
         return True
 
 def is_full_url(url):
-    link_re = re.compile(r'^(http(s)?:\/\/[a-zA-Z0-9\-_]+\.[a-zA-Z]+(.)+)+')
+    """Check if the url is valid."""
+    link_re = re.compile(r'^(http(s)?:\/\/[a-zA-Z0-9\-_]+)+')
     return True if link_re.match(url) else False
 
 
