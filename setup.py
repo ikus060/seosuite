@@ -29,5 +29,7 @@ setup(
         'requests',
         'beautifulsoup4',
         'lxml',
+        'gdata',
+        'flask',
     ],
 )

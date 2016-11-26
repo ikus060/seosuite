@@ -3,3 +3,5 @@ PyYAML==3.10
 requests
 beautifulsoup4
 lxml
+gdata
+flask
