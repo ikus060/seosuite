@@ -22,12 +22,12 @@ Instructions
     > cat schema.sql | mysql -useo -p seocrawler
     > cp testurls.example testurls
     > cp config.yaml.example config.yaml
-    > ./seocrawler.py http://fashionista.com
+    > ./run_seocrawler.py --database config.yaml --base_url http://fashionista.com --internal
 
 CLI Options
 -----------
 
-    $> python seocrawler.py --help
+    $> ./run_seocrawler.py --help
     Usage: seocrawler.py [options]
     
     Crawl the given url(s) and check them for SEO or navigation problems.
@@ -69,7 +69,7 @@ Instructions
 ------------
 
     > pip install -r requirements.txt
-    > curl --silent http://fashionista.com?__escaped_fragment__= | python seolinter/__init__.py
+    > curl --silent http://fashionista.com?__escaped_fragment__= | ./run_seolinter.py
 
 Lint Rules
 ----------
@@ -109,8 +109,7 @@ Instructions
 ------------
 
     > pip install -r requirements.txt
-    # python seoreporter/__init__.py [type] [format] [run_id]
-    > python seoreporter/__init__.py build junit d09b8571-5c8a-42ff-8ab7-c38f4f8871c4
+    > ./run_seoreporter.py --database=config.yaml --format=junit --run_id=d09b8571-5c8a-42ff-8ab7-c38f4f8871c4
 
 
 SEO Dashboard
