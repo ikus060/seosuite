@@ -18,7 +18,8 @@ Instructions
 ------------
 
     > pip install -r requirements.txt
-    > cat schema.sql | mysql -uusername -p
+    > cat createuser.sql | mysql -uroot -p
+    > cat schema.sql | mysql -useo -p seocrawler
     > cp testurls.example testurls
     > cp config.yaml.example config.yaml
     > ./seocrawler.py http://fashionista.com
