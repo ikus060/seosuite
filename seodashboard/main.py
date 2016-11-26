@@ -43,8 +43,8 @@ def fetch_run_count(run_id):
 
 def fetch_run_ids():
     c = db.cursor()
-    c.execute('SELECT DISTINCT run_id FROM crawl_urls ORDER BY timestamp ASC')
-    return [result[0] for result in c.fetchall()]
+    c.execute('SELECT run_id, timestamp, domain FROM crawl_urls GROUP BY run_id ORDER BY timestamp ASC ')
+    return cols_to_props(c)
 
 def fetch_url(url_id):
     c = db.cursor()
