@@ -37,7 +37,8 @@ def run(options):
 
     # Initialize the database cursor
     db = MySQLdb.connect(host=db_conf.get('host'), user=db_conf.get('user'),
-        passwd=db_conf.get('pass'), db=db_conf.get('name'), use_unicode=True)
+        passwd=db_conf.get('pass'), db=db_conf.get('name'), use_unicode=True,
+        charset='utf8')
 
     if options.run_id:
         run_id = options.run_id

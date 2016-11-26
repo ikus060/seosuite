@@ -123,6 +123,7 @@ if __name__ == "__main__":
     # Initialize the database cursor
     db_conf = env.get('db', {})
     db = MySQLdb.connect(host=db_conf.get('host'), user=db_conf.get('user'),
-        passwd=db_conf.get('pass'), db=db_conf.get('name'), use_unicode=True)
+        passwd=db_conf.get('pass'), db=db_conf.get('name'), use_unicode=True,
+        charset='utf8')
 
     app.run(debug=True)
