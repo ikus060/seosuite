@@ -259,7 +259,7 @@ def lint_html(html_string, level=INFO):
     if p['robots'] and "noindex" in p['robots']:
         output['I21'] = p['robots']
 
-    if p['h1_count'] >= 1:
+    if p['h1_count'] > 1:
         output['W23'] = p['h1_count']
 
     if word_match_count(p['title_keywords'], p['h1_keywords']) < 1:
