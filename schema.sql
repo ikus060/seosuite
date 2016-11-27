@@ -55,6 +55,8 @@ CREATE TABLE `crawl_urls` (
   `meta_robots` varchar(16) DEFAULT NULL,
   `rel_next` varchar(2048) DEFAULT NULL,
   `rel_prev` varchar(2048) DEFAULT NULL,
+  `keywords` text,
+  `lang` varchar(16)  DEFAULT NULL,
 
   # lint data
   `lint_critical` int(10) unsigned DEFAULT NULL,

@@ -290,6 +290,8 @@ def extract_page_details(html, url):
     canonical = soup.find('head').find('link', attrs={"rel":"canonical"})
     h1_1 = soup.find('h1')
     h1_2 = soup.find_all('h1')[1] if len(soup.find_all('h1')) > 1 else None
+    lang = soup.find('html').get('lang', None)
+    keywords = extract_all_keywords(soup, url, lang)
 
     return {
         'size': len(html),
@@ -306,7 +308,61 @@ def extract_page_details(html, url):
         'meta_robots': robots.get("content") if robots else None,
         'rel_next': rel_next.get("href") if rel_next else None,
         'rel_prev': rel_prev.get('href') if rel_prev else None,
+        'keywords': keywords,
+        'lang': lang,
     }
+
+def extract_all_keywords(soup, url, lang):
+    
+    def visible(element):
+        if element.parent.name in ['style', 'script']:
+            return False
+        elif element.__class__.__name__ in ['Comment']:
+            return False
+        elif not unicode(element).strip():
+            return False
+        return True
+    
+    def parent_tag(element):
+        important_tags = ['title', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'footer', 'a', 'b', 'img']
+        while element.parent is not None:
+            if element.parent.name in important_tags:
+                return element.parent.name
+            element = element.parent
+        return 'default'
+    
+    def append_keywords(keywords, loc, text, lang):
+        for word in seolinter.extract_keywords(text, lang=lang):
+            count = keywords.setdefault(word, {}).setdefault(loc, 0)
+            keywords[word][loc] = count + 1
+    
+    # Include keyword from all text
+    keywords = {}
+    for element in filter(visible, soup.findAll(text=True)):
+        tag = parent_tag(element)
+        append_keywords(keywords, tag, element, lang)
+
+    # Include keyword from meta description
+    meta_description = soup.find('head').find('meta', attrs={"name":"description"})
+    append_keywords(keywords, 'meta.description', meta_description, lang)
+    
+    # Include keyword from meta keywords
+    meta_keywords = soup.find('head').find('meta', attrs={"name":"keywords"})
+    append_keywords(keywords, 'meta.keywords', meta_keywords, lang)
+    
+    # Include keyword from img:alt
+    for img in soup.findAll("img"):
+        if img.alt:
+            append_keywords(keywords, 'img', img.alt, lang)
+    
+    # Include keyword in URL.
+    append_keywords(keywords, 'url', url, lang)
+    
+    # Sum
+    for word in keywords.keys():
+        keywords[word]['total'] = sum(keywords[word].values())    
+    
+    return keywords
 
 
 def store_results(db, run_id, stats, lint_errors, page_details, external=False, valid=True):

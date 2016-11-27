@@ -21,9 +21,26 @@ levels = (
 html_parser = "lxml"
 # html_parser = "html.parser"
 
-stop_words = ('a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'that',
-            'from', 'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'the',
-            'to', 'was', 'were', 'will', 'with')
+stop_words = {
+    'en': ('a', 'an', 'and', 'are', 'as', 'at', 'be', 'by', 'for', 'that',
+           'from', 'has', 'he', 'in', 'is', 'it', 'its', 'of', 'on', 'the',
+           'to', 'was', 'were', 'will', 'with'),
+    'fr': (# determinants
+           'un', 'une', 'le', 'la', 'les', 'au', 'aux', 'du', 'des', 'mon',
+           'ma', 'mes', 'ton', 'ta', 'tes', 'son', 'sa', 'ses', 'notre',
+           'nos', 'votre', 'vos', 'leur', 'leurs', 'ce', 'cet', 'cette', 'ces',
+           'aucun', 'chaque', 'nul', 'plusieurs', 'quelques', 'certains',
+           # pronoms
+           'je', 'tu', 'il', 'elle', 'nous', 'vous', 'ils', 'elles',
+           # preposition
+           'sur', 'sous', 'entre', 'devant', 'derrière', 'dans', 'chez',
+           'avant', 'après', 'vers', 'depuis', 'pendant', 'pour',
+           'vers', 'à', 'de', "jusqu'à", "jusqu'au", 'de', 'par', 'plus',
+           # verbs
+           'est', 'a', 'sont',
+           #others
+           'que')
+}
 
 rules = [
     # for html
@@ -176,14 +193,14 @@ def parse_robots_txt(txt):
         'user_agent': user_agent
     }
 
-def extract_keywords(text):
+def extract_keywords(text, min_word_size=3, lang='en'):
     # We probably don't care about words shorter than 3 letters
-    min_word_size = 3
+    pattern = re.compile(u'\W', re.UNICODE)
     text = unicode(text)
     if text:
         return [kw.lower()
-            for kw in re.sub('[^A-Za-z0-9\-\']', ' ', text).split()
-            if kw not in stop_words and len(kw) >= min_word_size]
+            for kw in pattern.sub(u' ', text).split()
+            if kw not in stop_words.get(lang,[]) and len(kw) >= min_word_size]
     else:
         return []
 
