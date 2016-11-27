@@ -1,0 +1,13 @@
+# Copyright (c) 2015, Bell Canada All rights reserved.
+# Bell Canada PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
+#
+# This file define the file to include in the source distribution (sdist)
+#
+
+include *.py
+include *.sql
+include LICENSE-MIT
+include README.md
+include config.yaml.example
+include testurls.example
+recursive-include seodashboard *.html *.py

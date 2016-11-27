@@ -104,7 +104,10 @@ def url_page():
         keywords=keywords,
         )
 
-if __name__ == "__main__":
+
+def main():
+    global db
+    global app
     env = yaml.load(open('config.yaml'))
 
     # Initialize the database cursor
@@ -114,3 +117,7 @@ if __name__ == "__main__":
         charset='utf8')
 
     app.run(debug=True)
+
+
+if __name__ == "__main__":
+    main()

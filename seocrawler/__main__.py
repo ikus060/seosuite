@@ -19,6 +19,7 @@ def run(options):
         with open(options.database, 'r') as f:
             env = yaml.load(f)
         db_conf = env.get('db', {})
+        moz_conf = env.get('moz', {})
     else:
         db_conf = {
             'host': os.environ.get('SEO_DB_HOSTNAME'),
@@ -68,15 +69,20 @@ def run(options):
             (options.run_id,))
         processed_urls = dict([(row[1], row[0]) for row in cur.fetchall()])
 
+    # Get Moz options
+    moz_accessid = options.moz_accessid or moz_conf.get('accessid', None)
+    moz_secretkey = options.moz_secretkey or moz_conf.get('secretkey', None)
+
     run_id = crawl(urls, db, options.internal, options.delay,
-        options.user_agent, url_associations, run_id, processed_urls, limit=options.limit)
+        options.user_agent, url_associations, run_id, processed_urls, limit=options.limit,
+        moz_accessid=moz_accessid, moz_secretkey=moz_secretkey)
 
     if options.output:
         with open(options.output, 'w') as f:
             f.write(report(db, 'build', 'junit', run_id))
 
 
-if __name__ == "__main__":
+def main():
     parser = optparse.OptionParser(description='Crawl the given url(s) and check them for SEO or navigation problems.')
 
     # Input sources
@@ -104,7 +110,11 @@ if __name__ == "__main__":
 
     parser.add_option('--database', type="string",
         help='A yaml configuration file with the database configuration properties.')
-
+    
+    parser.add_option('--moz-accessid', type="string",
+        help='Your mozscape accessid.')
+    parser.add_option('--moz-secretkey', type="string",
+        help='Your mozscape secret key.')
 
     parser.add_option('-o', '--output', type="string",
         help='The path of the file where the output junit xml will be written to.')
@@ -112,3 +122,7 @@ if __name__ == "__main__":
     args = parser.parse_args()[0]
 
     run(args)
+
+
+if __name__ == "__main__":
+    main()

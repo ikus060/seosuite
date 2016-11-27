@@ -21,34 +21,11 @@ html_parser = "lxml"
 
 TIMEOUT = 16
 
-JOBS_DIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'jobs')
-
 def crawl(urls, db, internal=False, delay=0, user_agent=None,
     url_associations={}, run_id=None, processed_urls={}, limit=0):
 
     run_id = run_id or uuid.uuid4()
     print "Starting crawl with run_id: %s" % run_id
-
-    def _save_state(run_id, u, ua):
-
-        if not os.path.exists(JOBS_DIR):
-            os.makedirs(JOBS_DIR)
-
-        print len(u), len(ua)
-        if len(u) == 0 and len(ua) == 0:
-            return
-
-        # open the job file
-        with gzip.open("%s/%s.gz" % (JOBS_DIR, run_id), 'w+') as f:
-            data = {
-                'urls': u,
-                'associations': ua,
-            }
-
-            f.write(json.dumps(data))
-
-
-    atexit.register(_save_state, run_id, urls, url_associations)
 
     run_count = 0
     limit_reached = False
@@ -145,11 +122,6 @@ def crawl(urls, db, internal=False, delay=0, user_agent=None,
             from_id = processed_urls.get(association)
             if to_id and from_id and from_id != to_id:
                 associate_link(db, to_id, from_id, run_id, 'anchor', link.get('text'), link.get('alt'), link.get('rel'))
-
-    # Clean up any save files that might exist
-    if os.path.exists('%s/%s.gz' % (JOBS_DIR, run_id)):
-        print "Deleting job file (%s/%s.gz)" % (JOBS_DIR, run_id)
-        os.remove('%s/%s.gz' % (JOBS_DIR, run_id))
 
     return run_id
 

@@ -92,7 +92,8 @@ def run(options):
     else:
         print seoreporter.report(db, options.type, options.format, run_id)
 
-if __name__ == "__main__":
+
+def main():
     parser = optparse.OptionParser(description='Runs various reports on the seocrawler database in various formats.')
 
     parser.add_option('-r', '--run_id', type="string", default=None,
@@ -114,3 +115,7 @@ if __name__ == "__main__":
     args = parser.parse_args()[0]
 
     run(args)
+
+
+if __name__ == "__main__":
+    main()

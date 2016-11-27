@@ -47,7 +47,8 @@ def run(options, args):
 
     sys.exit(exit)
 
-if __name__ == "__main__":
+
+def main():
     parser = optparse.OptionParser(description='Validates html, sitemap xml and robots.txt content for common errors.')
 
     parser.add_option('-f', '--format', type="string", default='auto',
@@ -56,3 +57,7 @@ if __name__ == "__main__":
     (options, args) = parser.parse_args()
 
     run(options, args)
+
+
+if __name__ == "__main__":
+    main()

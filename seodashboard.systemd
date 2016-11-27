@@ -1,0 +1,11 @@
+[Unit]
+Description=SEO Dashboard
+After=network.target
+
+[Service]
+User=user
+Group=nginx
+ExecStart=/usr/local/bin/seodashboard --database /usr/local/etc/seosuite/config.yaml
+
+[Install]
+WantedBy=multi-user.target
