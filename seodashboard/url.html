@@ -127,6 +127,58 @@
 	</ul>
 </div>
 
+{% if url.moz_pda or url.moz_ulc %}
+<div class="panel panel-default">
+<div class="panel-heading"><h3 class="panel-title">Mozscape</h3></div>
+<div class="panel-body text-center">
+<div class="row">
+  <div class="col-sm-2">
+    <b><span data-toggle="tooltip" title="The number of equity links (internal or external) to the URL.">
+        External Equity Links</span></b><br/>
+    <span>{{ "{0:0.1f}".format(url.moz_ueid) }}</span>
+  </div>
+  <div class="col-sm-2">
+	<b><span data-toggle="tooltip" title="The number of links (equity or nonequity or not, internal or external) to the URL.">
+		Links</span></b><br/>
+	<span>{{ url.moz_uid }}</span>
+  </div>
+  <div class="col-sm-2">
+	<b><span data-toggle="tooltip" title="The MozRank of the URL, in the normalized 10-point score.">
+		MozRank</span></b><br/>
+	<div class="progress">
+	  <div class="progress-bar progress-bar-striped" role="progressbar"  style="width: {{ url.moz_umrp * 10 }}%">
+	    {{ "{0:0.2f}".format(url.moz_umrp) }}
+	  </div>
+	</div>
+  </div>
+  <div class="col-sm-2">
+	<b><span data-toggle="tooltip" title="A normalized 100-point score representing the likelihood of a page to rank well in search engine results.">
+		Page Authority</span></b><br/>
+	<div class="progress">
+	  <div class="progress-bar progress-bar-striped" role="progressbar"  style="width: {{ url.moz_upa }}%">
+	    {{ "{0:0.2f}".format(url.moz_upa) }}
+	  </div>
+	</div>
+  </div>
+  <div class="col-sm-2">
+	<b><span data-toggle="tooltip" title="A normalized 100-point score representing the likelihood of a domain to rank well in search engine results.">
+		Domain Authority</span></b><br/>
+	<div class="progress">
+	  <div class="progress-bar progress-bar-striped" role="progressbar"  style="width: {{ url.moz_pda }}%">
+	    {{ "{0:0.2f}".format(url.moz_pda) }}
+	  </div>
+	</div>
+  </div>
+  <div class="col-sm-2">
+	<b><span data-toggle="tooltip" title="The time and date on which Mozscape last crawled the URL.">
+		Time last crawled</span></b><br/>
+	<span>{{ url.moz_ulc }}</span>
+  </div>
+</div>
+</div>
+</div>
+{% endif %}
+
 <div class="panel panel-default">
 <div class="panel-heading"><h3 class="panel-title">Technical details</h3></div>
 <div class="panel-body">

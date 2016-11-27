@@ -64,6 +64,14 @@ CREATE TABLE `crawl_urls` (
   `lint_warn` int(10) unsigned DEFAULT NULL,
   `lint_info` int(10) unsigned DEFAULT NULL,
   `lint_results` text,
+  
+  # moz data
+  `moz_upa` decimal(24,20) DEFAULT NULL,
+  `moz_pda` decimal(24,20) DEFAULT NULL,
+  `moz_ulc` datetime DEFAULT NULL,
+  `moz_umrp` decimal(24,20) DEFAULT NULL,
+  `moz_ueid` decimal(24,20) DEFAULT NULL,
+  `moz_uid` int(10) DEFAULT NULL,
 
   `timestamp` datetime DEFAULT NULL,
   PRIMARY KEY (`id`),

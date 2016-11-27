@@ -2,6 +2,7 @@
 
 import atexit
 from bs4 import BeautifulSoup
+import datetime
 import gzip
 import hashlib
 import json
@@ -13,6 +14,7 @@ import time
 from urlparse import urlparse, urljoin
 import uuid
 
+from mozscape import Mozscape
 import seolinter
 
 
@@ -22,7 +24,8 @@ html_parser = "lxml"
 TIMEOUT = 16
 
 def crawl(urls, db, internal=False, delay=0, user_agent=None,
-    url_associations={}, run_id=None, processed_urls={}, limit=0):
+    url_associations={}, run_id=None, processed_urls={}, limit=0,
+    moz_accessid=None, moz_secretkey=None):
 
     run_id = run_id or uuid.uuid4()
     print "Starting crawl with run_id: %s" % run_id
@@ -52,8 +55,10 @@ def crawl(urls, db, internal=False, delay=0, user_agent=None,
             if res['code'] == 200 and res['content_type'] == 'text/html':
 
                 lint_errors, page_details, links, sources = process_html(res['content'], res['url'])
+                
+                moz_data = retrieve_mozrank(res['url'], moz_accessid, moz_secretkey)
 
-                record = store_results(db, run_id, res, lint_errors, page_details)
+                record = store_results(db, run_id, res, lint_errors, page_details, moz_data)
                 processed_urls[url] = record
                 url_associations[url] = {}
 
@@ -67,7 +72,7 @@ def crawl(urls, db, internal=False, delay=0, user_agent=None,
                             bad_link = store_results(db, run_id, {
                                 'url': link_url,
                                 'code': 0,
-                                }, {}, {}, None)
+                                }, {}, {}, external=None)
                             processed_urls[link_url] = bad_link
                             associate_link(db, record, bad_link, run_id, 'anchor', link.get('text'), link.get('alt'), link.get('rel'))
                         elif not is_internal_url(link_url, url):
@@ -76,7 +81,7 @@ def crawl(urls, db, internal=False, delay=0, user_agent=None,
                                 link_results = retrieve_url(link_url, user_agent, False)
 
                                 for link_result in link_results:
-                                    link_store = store_results(db, run_id, link_result, {}, {}, True)
+                                    link_store = store_results(db, run_id, link_result, {}, {}, external=True)
                                     processed_urls[link_result['url']] = link_store
 
                                     # Associate links
@@ -101,7 +106,7 @@ def crawl(urls, db, internal=False, delay=0, user_agent=None,
 
                             for source_result in source_results:
                                 source_internal = is_internal_url(source_result['url'], url)
-                                source_store = store_results(db, run_id, source_result, {}, {}, not source_internal)
+                                source_store = store_results(db, run_id, source_result, {}, {}, external=not source_internal)
                                 processed_urls[source_url] = source_store
                                 associate_link(db, record, source_store, run_id, 'asset', None, source.get('alt'), None)
 
@@ -109,7 +114,7 @@ def crawl(urls, db, internal=False, delay=0, user_agent=None,
                             associate_link(db, record, processed_urls[source_url], run_id, 'asset', None, source.get('alt'), None)
 
             else:
-                record = store_results(db, run_id, res, lint_errors, page_details, False)
+                record = store_results(db, run_id, res, lint_errors, page_details, external=False)
                 processed_urls[url] = record
 
         time.sleep(delay / 1000.0)
@@ -124,6 +129,23 @@ def crawl(urls, db, internal=False, delay=0, user_agent=None,
                 associate_link(db, to_id, from_id, run_id, 'anchor', link.get('text'), link.get('alt'), link.get('rel'))
 
     return run_id
+
+
+def retrieve_mozrank(url, accessid, secret_key):
+    # if access id or secret is not provided, don't query Mozscape metrics.
+    # https://moz.com/help/guides/moz-api/mozscape/api-reference/url-metrics
+    if not accessid or not secret_key:
+        return {}
+    # If URL is local, skip it too.
+    client = Mozscape(accessid, secret_key)
+    for i in range(0, 3):
+        try:
+            return client.urlMetrics([url])[0]
+        except Exception as e:
+            print("mozscape failed trial %s: %s (%s)" % (i, url, str(e)))
+            time.sleep(11)
+    return {}
+
 
 def retrieve_url(url, user_agent=None, full=True):
 
@@ -351,7 +373,7 @@ def extract_all_keywords(soup, url, lang):
     return keywords
 
 
-def store_results(db, run_id, stats, lint_errors, page_details, external=False, valid=True):
+def store_results(db, run_id, stats, lint_errors, page_details, moz_data={}, external=False, valid=True):
     cur = db.cursor()
 
     def prepare_sql(param):
@@ -412,7 +434,15 @@ def store_results(db, run_id, stats, lint_errors, page_details, external=False, 
             'lint_error': len([l for l in lint_keys if l[0] == 'E']),
             'lint_warn': len([l for l in lint_keys if l[0] == 'W']),
             'lint_info': len([l for l in lint_keys if l[0] == 'I']),
-            'lint_results': json.dumps(lint_errors)
+            'lint_results': json.dumps(lint_errors),
+            
+            # moz data
+            'moz_upa': moz_data.get('upa', 0),
+            'moz_pda': moz_data.get('pda', 0),
+            'moz_ulc': datetime.datetime.fromtimestamp(moz_data.get('ulc', 0)),
+            'moz_umrp': moz_data.get('umrp', 0),
+            'moz_ueid': moz_data.get('ueid', 0),
+            'moz_uid': moz_data.get('uid', 0),
         }
         cur.execute(prepare_sql(param), param.values())
         db.commit()

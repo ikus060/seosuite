@@ -59,8 +59,9 @@ def cols_to_props(c):
     for result in c.fetchall():
         url = dict(zip(descriptions, result))
         # unmarshal keywords
-        keywords = json.loads(url.get('keywords', '{}')) or {}
-        url['keywords'] = sorted(keywords.items(), key=lambda x: x[1].get('total'), reverse=True)
+        if 'keywords' in url:
+            keywords = json.loads(url.get('keywords', '{}')) or {}
+            url['keywords'] = sorted(keywords.items(), key=lambda x: x[1].get('total'), reverse=True)
         output.append(url)
     return output
 

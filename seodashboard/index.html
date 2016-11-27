@@ -14,6 +14,7 @@
                 <th>Heading</th>
                 <th>Meta Description</th>
                 <th>Meta Keywords</th>
+                <th><span data-toggle="tooltip" title="Page Authority">PA</span></th>
             </thead>
 
             {% for url in crawl_urls %}
@@ -33,6 +34,7 @@
                    {% if 'meta.description' in k[1] %}{{ k[0] }}, {% endif %}
                    {% endfor %}
                 </td>
+                <td>{{ "{0:0.1f}".format(url.moz_upa) }}</td>
             </tr>
             {% endfor %}
         </table>
