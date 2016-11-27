@@ -58,7 +58,8 @@ def crawl(urls, db, internal=False, delay=0, user_agent=None,
 
         print "\nProcessing (%d / %d): %s" % (run_count, len(urls), url)
         if not is_full_url(url):
-            processed_urls[url] = urls.pop(0)
+            urls.pop(0)
+            processed_urls[url] = 0
             continue
             # raise ValueError('A relative url as provided: %s. Please ensure that all urls are absolute.' % url)
 
