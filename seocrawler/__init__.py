@@ -312,17 +312,10 @@ def extract_page_details(html, url):
 def store_results(db, run_id, stats, lint_errors, page_details, external=False, valid=True):
     cur = db.cursor()
 
-    insert = '''
-INSERT INTO `crawl_urls` (
-  `run_id`, `level`, `content_hash`,
-  `address`, `domain`, `path`, `external`, `status_code`, `status`, `body`, `size`, `address_length`, `encoding`, `content_type`, `response_time`, `redirect_uri`, `canonical`,
-  `title_1`, `title_length_1`, `title_occurences_1`, `meta_description_1`, `meta_description_length_1`, `meta_description_occurrences_1`, `h1_1`, `h1_length_1`, `h1_2`, `h1_length_2`, `h1_count`, `meta_robots`, `rel_next`, `rel_prev`,
-  `lint_critical`, `lint_error`, `lint_warn`, `lint_info`, `lint_results`, `timestamp`) VALUES (
-    %s, 0, %s,
-    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s,
-    %s, %s, %s, %s, %s, NOW())
-    '''
+    def prepare_sql(param):
+        fields = ', '.join(['`%s`' % k for k in param.keys()])
+        values = ', '.join(['%s'] * len(param))
+        return 'INSERT INTO `crawl_urls` ( `level`, `timestamp`, %s) VALUES ( 0, NOW(), %s)' % (fields, values) 
 
     try:
         url = stats.get('url')
@@ -334,49 +327,52 @@ INSERT INTO `crawl_urls` (
         except:
             lint_res = '[]'
         s = int(stats.get('size', 0))
-        cur.execute(insert, (
-            run_id,
-            content_hash if content else None,                  # content_hash
+        param = {
+            'run_id': run_id,
+            'content_hash': content_hash if content else None,
 
             # request data
-            stats.get('url'),                                   # address
-            _get_base_url(url) if valid else None,              # domain
-            _get_path(url) if valid else None,                  # path
-            1 if external else 0,                               # external
-            stats.get('code'),                                  # status_code
-            stats.get('reason'),                                # status
-            stats.get('content', ''),                           # body
-            s if s >= 0 else 0,                                 # size
-            len(url),                                           # address_length
-            stats.get('encoding'),                              # encoding
-            stats.get('content_type'),                          # content_type
-            stats.get('response_time'),                         # response_time
-            None,                                               # redirect_uri
-            page_details.get('canonical'),                      # canonical
+            'address': stats.get('url'),
+            'domain': _get_base_url(url) if valid else None,
+            'path': _get_path(url) if valid else None,
+            'external': 1 if external else 0,
+            'status_code': stats.get('code'),
+            'status': stats.get('reason'),
+            'body': stats.get('content', ''),
+            'size': s if s >= 0 else 0,
+            'address_length': len(url),
+            'encoding': stats.get('encoding'),
+            'content_type': stats.get('content_type'),
+            'response_time': stats.get('response_time'),
+            'redirect_uri': None,
+            'canonical': page_details.get('canonical'),
 
             # parse data
-            page_details.get('title_1'),                        # title_1
-            page_details.get('title_length_1'),                 # title_length_1
-            page_details.get('title_occurences_1'),             # title_occurences_1
-            page_details.get('meta_description_1'),             # meta_description
-            page_details.get('meta_description_length_1'),      # meta_description_length_1
-            page_details.get('meta_description_occurrences_1'), # meta_description_occurrences_1
-            page_details.get('h1_1'),                           # h1_1
-            page_details.get('h1_length_1'),                    # h1_length_1
-            page_details.get('h1_2'),                           # h1_2
-            page_details.get('h1_length_2'),                    # h1_length_2
-            page_details.get('h1_count'),                       # h1_count
-            page_details.get('meta_robots'),                    # meta_robots
-            page_details.get('rel_next'),                       # rel_next
-            page_details.get('rel_prev'),                       # rel_prev
+            'title_1': page_details.get('title_1'),
+            'title_length_1': page_details.get('title_length_1'),
+            'title_occurences_1': page_details.get('title_occurences_1'),
+            'meta_description_1': page_details.get('meta_description_1'),
+            'meta_description_length_1': page_details.get('meta_description_length_1'),
+            'meta_description_occurrences_1': page_details.get('meta_description_occurrences_1'),
+            'h1_1': page_details.get('h1_1'),
+            'h1_length_1': page_details.get('h1_length_1'),
+            'h1_2': page_details.get('h1_2'),
+            'h1_length_2': page_details.get('h1_length_2'),
+            'h1_count': page_details.get('h1_count'),
+            'meta_robots': page_details.get('meta_robots'),
+            'rel_next': page_details.get('rel_next'),
+            'rel_prev': page_details.get('rel_prev'),
+            'lang': page_details.get('lang'),
+            'keywords': json.dumps(page_details.get('keywords')),
 
             # lint data
-            len([l for l in lint_keys if l[0] == 'C']),         # lint_critical
-            len([l for l in lint_keys if l[0] == 'E']),         # lint_error
-            len([l for l in lint_keys if l[0] == 'W']),         # lint_warn
-            len([l for l in lint_keys if l[0] == 'I']),         # lint_info
-            json.dumps(lint_errors)                             # lint_results
-            ))
+            'lint_critical': len([l for l in lint_keys if l[0] == 'C']),
+            'lint_error': len([l for l in lint_keys if l[0] == 'E']),
+            'lint_warn': len([l for l in lint_keys if l[0] == 'W']),
+            'lint_info': len([l for l in lint_keys if l[0] == 'I']),
+            'lint_results': json.dumps(lint_errors)
+        }
+        cur.execute(prepare_sql(param), param.values())
         db.commit()
     except:
         db.rollback()
