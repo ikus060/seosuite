@@ -8,3 +8,6 @@ _seoreporter_html_
 /*.xls
 /seocrawler/jobs
 /jobs
+/.project
+/.pydevproject
+/.settings
