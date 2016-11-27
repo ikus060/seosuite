@@ -156,8 +156,21 @@ def crawl(urls, db, internal=False, delay=0, user_agent=None,
 def retrieve_url(url, user_agent=None, full=True):
 
     def _build_payload(response, request_time):
+        # Since alot of server doesn't report Content-Type with proper
+        # encoding, have a look at content, then use default encoding.
+        charset_re = re.compile(r'<meta.*?charset=["\']*(.+?)["\'>]', flags=re.I)
+        pragma_re = re.compile(r'<meta.*?content=["\']*;?charset=(.+?)["\'>]', flags=re.I)
+        xml_re = re.compile(r'^<\?xml.*?encoding=["\']*(.+?)["\'>]')
+        encoding = (charset_re.findall(response.content) or
+            pragma_re.findall(response.content) or
+            pragma_re.findall(response.content) or
+            xml_re.findall(response.content) or 
+            [response.encoding])[0]
+        response.encoding = encoding 
+        
         size = response.headers.get('content-length') or len(response.text)
         content_type = response.headers.get('content-type')
+        
         return {
             'url': response.url,
             'url_length': len(response.url),
@@ -166,7 +179,7 @@ def retrieve_url(url, user_agent=None, full=True):
             'code': int(response.status_code),
             'reason': response.reason,
             'size': size,
-            'encoding': response.encoding,
+            'encoding': encoding,
             'response_time': request_time,
         }
 
