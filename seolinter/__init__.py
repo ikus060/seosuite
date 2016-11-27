@@ -228,7 +228,7 @@ def lint_html(html_string, level=INFO):
     elif len(p['title']) > 58:
         output['W03'] = True
 
-    if not p['meta_description']:
+    if not p['meta_description'] or not p['meta_description'].get("content"):
         output['E05'] = True
     elif len(p['meta_description'].get('content')) > 150:
         output['W06'] = True
