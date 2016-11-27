@@ -55,8 +55,9 @@ rules = [
     ('E17', '<1000 outlinks on page', ERROR),
     ('W03', 'title < 58 chars', WARN),
     # ('W04', 'duplicate title', WARN),
-    ('W06', 'meta description < 150 chars', WARN),
+    ('W06', 'meta description > 150 chars', WARN),
     # ('W07', 'duplicate meta description', WARN),
+    ('W08', 'meta description < 70 chars', WARN),
     ('W14', 'title matches <3 h1 words', WARN),
     ('W15', 'title matches <3 meta description word', WARN),
     ('W16', '<300 outlinks on page', WARN),
@@ -231,6 +232,8 @@ def lint_html(html_string, level=INFO):
         output['E05'] = True
     elif len(p['meta_description'].get('content')) > 150:
         output['W06'] = True
+    elif len(p['meta_description'].get('content')) < 70:
+        output['W08'] = True
 
     if not p['canonical']:
         output['E08'] = True
