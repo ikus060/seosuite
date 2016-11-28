@@ -83,7 +83,7 @@
 		<th>Occ.</td>
 		<th>Location</td>
 	</thead>
-    {% for keyword, occurences in keywords %}
+    {% for keyword, occurences in url.keywords %}
     {% if occurences['total'] > 1 %}
     <tr>
 	    <td>{{ keyword }}</td>

@@ -55,7 +55,11 @@ def cols_to_props(c):
     output = []
     descriptions = [t[0] for t in c.description]
     for result in c.fetchall():
-        output.append(dict(zip(descriptions, result)))
+        url = dict(zip(descriptions, result))
+        # unmarshal keywords
+        keywords = json.loads(url.get('keywords', '{}')) or {}
+        url['keywords'] = sorted(keywords.items(), key=lambda x: x[1].get('total'), reverse=True)
+        output.append(url)
     return output
 
 @app.route("/")
@@ -91,8 +95,6 @@ def url_page():
     lint_results = json.loads(url.get('lint_results'))
     lint_desc = {t[0]: t[1] for t in seolinter.rules}
     lint_level = {t[0]: t[2] for t in seolinter.rules}
-    keywords = json.loads(url.get('keywords', '{}')) or {}
-    keywords = sorted(keywords.items(), key=lambda x: x[1].get('total'), reverse=True)
 
     return render_template('url.html',
         run_ids=run_ids,
@@ -101,7 +103,6 @@ def url_page():
         lint_results=lint_results,
         lint_desc=lint_desc,
         lint_level=lint_level,
-        keywords=keywords,
         )
 
 
