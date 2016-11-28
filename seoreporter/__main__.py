@@ -6,21 +6,20 @@
 # example:
 # > seoreporter.py --database=config.yaml build junit 8b32142a-b553-4309-a4bd-c2e6b031746f
 
-import optparse
-import os
-import datetime
-
 import MySQLdb
-import yaml
-
-import gdata.spreadsheet.service
-import gdata.service
-import gdata.spreadsheet
+import datetime
 import gdata.docs
 import gdata.docs.client
 import gdata.docs.data
+import gdata.service
+import gdata.spreadsheet
+import gdata.spreadsheet.service
+import optparse
+import os
+import yaml
 
 import seoreporter
+
 
 def run(options):
     if options.database:

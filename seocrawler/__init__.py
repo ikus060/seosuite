@@ -1,20 +1,20 @@
- # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
-import os
-import sys
-import time
-import uuid
-import requests
-import re
+import atexit
+from bs4 import BeautifulSoup
+import gzip
 import hashlib
 import json
+import os
+import re
+import requests
+import sys
+import time
 from urlparse import urlparse, urljoin
-import atexit
-import gzip
-
-from bs4 import BeautifulSoup
+import uuid
 
 import seolinter
+
 
 html_parser = "lxml"
 # html_parser = "html.parser"
@@ -112,7 +112,7 @@ def crawl(urls, db, internal=False, delay=0, user_agent=None,
                 record = store_results(db, run_id, res, lint_errors, page_details, False)
                 processed_urls[url] = record
 
-        time.sleep( delay / 1000.0 )
+        time.sleep(delay / 1000.0)
         urls.pop(0)
 
     # Process associations
@@ -199,7 +199,7 @@ def retrieve_url(url, user_agent=None, full=True):
         request_time = time.time() - start
         # TODO: Properly handle the failure. reraise?
 
-    return [_build_payload(res, request_time),] + redirects
+    return [_build_payload(res, request_time), ] + redirects
 
 
 def process_html(html, url):
@@ -227,7 +227,7 @@ def extract_links(html, url):
             full_url = a_tag.get('href')
             valid = False
 
-        if full_url and 'mailto:' not in full_url: # Ignore any a tags that don't have an href
+        if full_url and 'mailto:' not in full_url:  # Ignore any a tags that don't have an href
             links.append({
                 'url': full_url,
                 'valid': valid,

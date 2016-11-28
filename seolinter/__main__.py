@@ -8,10 +8,11 @@
 # > curl http://www.biography.com/sitemaps.xml | seolinter.py
 
 import optparse
-import sys
 import re
+import sys
 
 import seolinter
+
 
 def run(options, args):
     stdin = sys.stdin.read()

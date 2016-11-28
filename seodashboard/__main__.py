@@ -4,12 +4,14 @@
 # Usage:
 # python seodashboard/main.py
 
-import yaml
-import json
 import MySQLdb
+from flask import Flask, render_template, request
+import json
+import yaml
+
 import seolinter
 
-from flask import Flask, render_template, request
+
 app = Flask(__name__, template_folder='.', static_folder='static', static_url_path='/static')
 db = None
 
@@ -80,7 +82,7 @@ def hello():
         run_ids=run_ids,
         crawl_urls=crawl_urls,
         prev_page=(page - 1 if page > 1 else None),
-        next_page=(page + 1 if page < crawl_url_count/page_length else None),
+        next_page=(page + 1 if page < crawl_url_count / page_length else None),
         )
 
 @app.route("/url")

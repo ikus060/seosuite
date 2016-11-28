@@ -1,14 +1,12 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import yaml
-import optparse
-import json
-import os
+import MySQLdb
 import gzip
 import json
-
-import MySQLdb
+import optparse
+import os
+import yaml
 
 from seocrawler import crawl
 from seoreporter import report
@@ -41,7 +39,7 @@ def run(options):
         with open(options.file, 'r') as f:
             urls = [url.strip() for url in f.readlines()]
     elif options.base_url:
-        urls = [options.base_url,]
+        urls = [options.base_url, ]
     elif options.yaml:
         with open(options.yaml, 'r') as f:
             url_yaml = yaml.load(f)

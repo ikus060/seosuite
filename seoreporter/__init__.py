@@ -1,4 +1,4 @@
- # -*- coding: utf-8 -*-
+# -*- coding: utf-8 -*-
 
 # usage:
 # > python seoreporter/__init__.py [type] [format] [run_id]
@@ -11,12 +11,12 @@
 # output html pages that show the data
 # output json
 
-import yaml
-import time
+import MySQLdb
 import datetime
 import os
+import time
+import yaml
 
-import MySQLdb
 
 start = None
 
@@ -346,7 +346,7 @@ def html_files_format(report_type, tests, run_id):
 
 def sql_format(report_type, tests, run_id):
     output = ''
-    fields = [] # track all the column names used to build the CREATE TABLE
+    fields = []  # track all the column names used to build the CREATE TABLE
 
     def sql_row(values, fields):
         o = "INSERT INTO `seoreport` ("
@@ -372,7 +372,7 @@ CREATE TABLE `seoreport` (
   `run_id` varchar(36) NOT NULL DEFAULT '',
   `report_type` varchar(36) NOT NULL DEFAULT '',
   '''
-    for v in set(fields): # dedupe them
+    for v in set(fields):  # dedupe them
         header += '  `%s` varchar(2048) NOT NULL DEFAULT \'\',\n' % (v)
     header += '''
   PRIMARY KEY (`id`),

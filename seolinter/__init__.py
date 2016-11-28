@@ -1,10 +1,10 @@
 # -*- coding: utf-8 -*-
 
-import sys
+from bs4 import BeautifulSoup
 import re
 import robotparser
+import sys
 
-from bs4 import BeautifulSoup
 
 CRITICAL = 0
 ERROR = 1
@@ -38,7 +38,7 @@ stop_words = {
            'vers', 'à', 'de', "jusqu'à", "jusqu'au", 'de', 'par', 'plus',
            # verbs
            'est', 'a', 'sont',
-           #others
+           # others
            'que')
 }
 
@@ -146,7 +146,7 @@ def _parse_sitemapurlset(soup):
     # storage for later...
     out = []
 
-    #extract what we need from the url
+    # extract what we need from the url
     for u in urls:
         out.append({
             'loc': u.find('loc').string if u.find('loc') else None,
@@ -167,7 +167,7 @@ def _parse_sitemapindex(soup):
     # storage for later...
     out = []
 
-    #extract what we need from the url
+    # extract what we need from the url
     for u in sitemaps:
         out.append({
             'loc': u.find('loc').string if u.find('loc') else None
@@ -201,7 +201,7 @@ def extract_keywords(text, min_word_size=3, lang='en'):
     if text:
         return [kw.lower()
             for kw in pattern.sub(u' ', text).split()
-            if kw not in stop_words.get(lang,[]) and len(kw) >= min_word_size]
+            if kw not in stop_words.get(lang, []) and len(kw) >= min_word_size]
     else:
         return []
 
