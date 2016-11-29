@@ -56,13 +56,13 @@
 <dl class="dl-horizontal">
   
     <dt>Title</dt>
-    <dd>{{ url.title_1 }}</dd>
+    <dd>{{ url.title_1 }} (length: {{ url.title_1 | length }})</dd>
   
 	<dt>Heading</dt>
 	<dd>{{ url.h1_1 }}{% if url.h1_2 %}<br/>{{ url.h1_2 }}{% endif %}</dd>
   
 	<dt>Meta Description</dt>
-	<dd>{{ url.meta_description_1 }}</dd>
+	<dd>{{ url.meta_description_1 }} (length: {{ url.meta_description_1 | length }})</dd>
   
 </dl>
 </div>
