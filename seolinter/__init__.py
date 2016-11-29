@@ -64,6 +64,7 @@ rules = [
     ('W18', 'page size is greater then 200K', WARN),
     ('W19', 'missing `alt` on image tags', WARN),
     ('W23', 'too many heading (h1)', WARN),
+    ('W24', 'heading structure is broken', WARN),
     ('I10', 'missing rel=prev', INFO),
     ('I11', 'missing rel=next', INFO),
     ('I20', 'has robots=nofollow', INFO),
@@ -99,7 +100,7 @@ def parse_html(html):
     robots = soup.find('head').find('meta', attrs={"name":"robots"})
     title = soup.title.get_text() if soup.title else unicode(soup.find('title'))
     h1s = soup.find_all('h1')
-    h1 = soup.find('h1') or h1s[0] if len(h1s) >= 1 else None
+    h = [bool(soup.find('h%s' % i)) for i in range(1, 7)]
     meta_description = soup.find('head').find('meta', attrs={"name":"description"})
 
     return {
@@ -113,10 +114,15 @@ def parse_html(html):
         'meta_description': meta_description,
         'meta_description_keywords':
             extract_keywords(meta_description.get('content')) if meta_description else [],
-        'h1': h1,
         'h1s': h1s,
         'h1_count': len(h1s),
-        'h1_keywords': extract_keywords(h1.get_text()) if h1 else [],
+        'h1_keywords': extract_keywords(h1s[0].get_text()) if h1s else [],
+        'h1': h[0],
+        'h2': h[1],
+        'h3': h[2],
+        'h4': h[3],
+        'h5': h[4],
+        'h6': h[5],
         # 'text_only': soup.get_text(),
         'links': soup.find_all('a'),
         'link_count': len(soup.find_all('a')),
@@ -264,6 +270,13 @@ def lint_html(html_string, level=INFO):
 
     if p['h1_count'] > 1:
         output['W23'] = p['h1_count']
+        
+    if (p['h1'] < p['h2'] or
+            p['h2'] < p['h3'] or
+            p['h3'] < p['h4'] or
+            p['h4'] < p['h5'] or
+            p['h5'] < p['h6']):
+        output['W24'] = [p['h1'], p['h2'], p['h3'], p['h4'], p['h5'], p['h6']]
 
     if word_match_count(p['title_keywords'], p['h1_keywords']) < 1:
         output['E12'] = (word_match_count(p['title_keywords'], p['h1_keywords']), p['title_keywords'], p['h1_keywords'])
