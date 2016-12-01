@@ -7,6 +7,7 @@
 import MySQLdb
 from flask import Flask, render_template, request
 import json
+import optparse
 import yaml
 
 import seolinter
@@ -112,7 +113,23 @@ def url_page():
 def main():
     global db
     global app
-    env = yaml.load(open('config.yaml'))
+
+    parser = optparse.OptionParser(description='SEO Dashboard presents crawl data viewable in the browser.')
+    parser.add_option('--database', type="string", default='config.yaml',
+        help='A yaml configuration file with the database configuration properties.')
+    parser.add_option('--host', type="string", default='127.0.0.1',
+        help='IP address to listen to. e.g.: 0.0.0.0 to listen to all interfaces. (default t0 127.0.0.1)')
+    parser.add_option('--port', type="string", default='5000',
+        help='Port to listen to. (default to 5000)')
+    args = parser.parse_args()[0]
+
+    # Try to open the config file.
+    try:
+        with open(args.database) as f:
+            env = yaml.load(f)
+    except IOError as e:
+        print(str(e))
+        exit(1)
 
     # Initialize the database cursor
     db_conf = env.get('db', {})
@@ -120,7 +137,7 @@ def main():
         passwd=db_conf.get('pass'), db=db_conf.get('name'), use_unicode=True,
         charset='utf8')
 
-    app.run(debug=True)
+    app.run(host=args.host, port=int(args.port), debug=True)
 
 
 if __name__ == "__main__":
