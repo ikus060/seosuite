@@ -3,9 +3,11 @@ Description=SEO Dashboard
 After=network.target
 
 [Service]
-User=user
-Group=nginx
+Type=simple
+User=www-data
+Group=www-data
 ExecStart=/usr/local/bin/seodashboard --database /usr/local/etc/seosuite/config.yaml
+Restart=always
 
 [Install]
 WantedBy=multi-user.target
