@@ -85,17 +85,17 @@ def hello():
     crawl_url_count = fetch_run_count(run_id)
     run_ids = fetch_run_ids()
 
-    print [page, crawl_url_count, page_length]
-
     return render_template('index.html',
         run_id=run_id,
         run_ids=run_ids,
         crawl_urls=crawl_urls,
+        page=page,
         prev_page=(page - 1 if page > 1 else None),
-        next_page=(page + 1 if page < crawl_url_count / page_length else None),
+        next_page=(page + 1 if (page + 1) < crawl_url_count / page_length else None),
+        count_page=crawl_url_count / page_length,
         )
 
-@app.route("/url")
+@app.route("/url/")
 def url_page():
     url_id = request.args.get('url_id', 1)
     crawl_urls = fetch_url(url_id)

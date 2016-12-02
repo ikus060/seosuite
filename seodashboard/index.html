@@ -1,10 +1,10 @@
 {% extends "common.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-    <h2>Crawl Data</h2>
-        <div class="pull-right"><a href="/delete?run_id={{ run_id }}" class="btn btn-danger">Delete</a></div>
+    <h2>Analysis Data</h2>
+    <div class="pull-right"><a href="/delete?run_id={{ run_id }}" class="btn btn-danger">Delete</a></div>
     <div class="table-responsive">
-        <table class="table table-striped table-condensed">
+        <table class="table table-striped table-condensed ">
             <thead>
                 <th>URL</th>
                 <th><span data-toggle="tooltip" title="Informational issues">I</span></th>
@@ -18,10 +18,13 @@
                 <th><span data-toggle="tooltip" title="Page Authority">PA</span></th>
             </thead>
 
+            <tbody>
             {% for url in crawl_urls %}
             <tr>
                 <td>
-                	<a href="/url?url_id={{ url.id }}">{{url.domain}}{{ url.path }}</a>
+                    <a href="/url?url_id={{ url.id }}" data-toggle="tooltip" title="{{url.domain}}{{ url.path }}">
+                        {{url.domain}}{{ url.path | truncate(50, True) }}
+                    </a>
                 </td>
                 <td>{% if url.lint_info %}<span class="label label-success">{{ url.lint_info }}</span>{% endif %}</td>
                 <td>{% if url.lint_warn %}<span class="label label-info">{{ url.lint_warn }}</span>{% endif %}</td>
@@ -38,15 +41,27 @@
                 <td>{{ "{0:0.1f}".format(url.moz_upa) }}</td>
             </tr>
             {% endfor %}
+            </tbody>
         </table>
     </div>
 
-    <ul>
-        {% if prev_page %}
-            <li class="btn btn-default"><a href="/?run_id={{ run_id }}&page={{ prev_page }}">Prev Page</a></li>
-        {% endif %}
-        {% if next_page %}
-            <li class="btn btn-default"><a href="/?run_id={{ run_id }}&page={{ next_page }}">Next Page</a></li>
-        {% endif %}
-    </ul>
+    <nav aria-label="Page navigation" class="text-center">
+      <ul class="pagination">
+        <li class="{% if not prev_page %}disabled{% endif %}">
+          <a href="/?run_id={{ run_id }}&page={{ prev_page }}" aria-label="Previous">
+            <span aria-hidden="true">&laquo;</span>
+          </a>
+        </li>
+        {% for i in range(1, count_page) %}
+        <li class="{% if page == i %}active{% endif %}">
+            <a href="/?run_id={{ run_id }}&page={{ i }}">{{ i }}</a>
+        </li>
+        {% endfor %}
+        <li class="{% if not next_page %}disabled{% endif %}">
+          <a href="/?run_id={{ run_id }}&page={{ next_page }}" aria-label="Next">
+            <span aria-hidden="true">&raquo;</span>
+          </a>
+        </li>
+      </ul>
+    </nav>
 {% endblock %}
