@@ -5,7 +5,7 @@
 # python seodashboard/main.py
 
 import MySQLdb
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, redirect
 import json
 import optparse
 import yaml
@@ -18,6 +18,14 @@ db = None
 
 default_page_length = 50
 
+def delete_run(run_id):
+    c = db.cursor()
+    try:
+        c.execute('DELETE FROM crawl_urls WHERE run_id = %s', [run_id])
+        db.commit()
+    except:
+        db.rollback()
+        raise
 
 def fetch_latest_run_id():
     run_id = None
@@ -108,6 +116,12 @@ def url_page():
         lint_desc=lint_desc,
         lint_level=lint_level,
         )
+
+@app.route("/delete/")
+def delete():
+    run_id = request.args.get('run_id', fetch_latest_run_id())
+    delete_run(run_id)
+    return redirect('/')
 
 
 def main():
