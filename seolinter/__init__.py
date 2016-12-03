@@ -284,10 +284,10 @@ def lint_html(html_string, level=INFO):
     if word_match_count(p['title_keywords'], p['meta_description_keywords']) < 1:
         output['E13'] = (word_match_count(p['title_keywords'], p['meta_description_keywords']), p['title_keywords'], p['meta_description_keywords'])
 
-    if word_match_count(p['title_keywords'], p['h1_keywords']) < 3:
+    if len(p['title_keywords']) >= 3 and word_match_count(p['title_keywords'], p['h1_keywords']) < 3:
         output['W14'] = (word_match_count(p['title_keywords'], p['h1_keywords']), p['title_keywords'], p['h1_keywords'])
 
-    if word_match_count(p['title_keywords'], p['meta_description_keywords']) < 3:
+    if len(p['title_keywords']) >= 3 and word_match_count(p['title_keywords'], p['meta_description_keywords']) < 3:
         output['W15'] = (word_match_count(p['title_keywords'], p['meta_description_keywords']), p['title_keywords'], p['meta_description_keywords'])
 
     images_missing_alt = []
