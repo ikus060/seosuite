@@ -110,16 +110,7 @@
 	{% for key, value in lint_results.items() %}
 		{% if lint_level.get(key) == level %}
 		<li class="list-group-item">
-		<h4>
-		{% if lint_level.get(key) == 0 %}<span class="label label-danger">Citical</span>
-		{% elif lint_level.get(key) == 1 %}<span class="label label-warning">Error</span>
-		{% elif lint_level.get(key) == 2 %}<span class="label label-info">Warn</span>
-		{% elif lint_level.get(key) == 3 %}<span class="label label-success">Info</span>
-		{% endif %}
-		<a href="/?run_id={{ run_id }}&filter_lint={{ key }}">{{ key }}</a>
-		 - {{ lint_desc.get(key) }}
-		</h4>
-		
+		<h4>{{ lint(key) }}</h4>
 		{{ value }}
 		</li>
 		{% endif %}

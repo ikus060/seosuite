@@ -1,8 +1,14 @@
 {% extends "common.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
+
+
     <h2>Analysis Data {% if filter_lint %}<small>(filtered)</small>{% endif %}</h2>
-    <div class="pull-right"><a href="/delete?run_id={{ run_id }}" class="btn btn-danger">Delete</a></div>
+
+    {% if filter_lint %}
+    <h3>Filtered by: {{ lint(filter_lint) }}</h3>
+    {% endif %}
+
     <div class="table-responsive">
         <table class="table table-striped table-condensed ">
             <thead>

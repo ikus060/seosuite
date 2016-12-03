@@ -18,6 +18,9 @@ db = MySQL()
 
 default_page_length = 50
 
+lint_desc = {t[0]: t[1] for t in seolinter.rules}
+lint_level = {t[0]: t[2] for t in seolinter.rules}
+
 def delete_run(run_id):
     conn = db.connection
     c = conn.cursor()
@@ -91,6 +94,8 @@ def index():
         run_id=run_id,
         run_ids=run_ids,
         filter_lint=filter_lint,
+        lint_desc=lint_desc,
+        lint_level=lint_level,
         crawl_urls=crawl_urls,
         page=page,
         prev_page=(page - 1 if page > 1 else None),
@@ -107,8 +112,6 @@ def url_page():
     
     url = crawl_urls[0]
     lint_results = json.loads(url.get('lint_results'))
-    lint_desc = {t[0]: t[1] for t in seolinter.rules}
-    lint_level = {t[0]: t[2] for t in seolinter.rules}
 
     return render_template('url.html',
         run_ids=run_ids,
