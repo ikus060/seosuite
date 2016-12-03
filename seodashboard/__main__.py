@@ -4,8 +4,8 @@
 # Usage:
 # python seodashboard/main.py
 
-import MySQLdb
 from flask import Flask, render_template, request, redirect
+from flask_mysqldb import MySQL
 import json
 import optparse
 import yaml
@@ -14,22 +14,23 @@ import seolinter
 
 
 app = Flask(__name__, template_folder='.', static_folder='static', static_url_path='/static')
-db = None
+db = MySQL()
 
 default_page_length = 50
 
 def delete_run(run_id):
-    c = db.cursor()
+    conn = db.connection
+    c = conn.cursor()
     try:
         c.execute('DELETE FROM crawl_urls WHERE run_id = %s', [run_id])
-        db.commit()
+        conn.commit()
     except:
-        db.rollback()
+        conn.rollback()
         raise
 
 def fetch_latest_run_id():
     run_id = None
-    c = db.cursor()
+    c = db.connection.cursor()
     c.execute('SELECT run_id FROM crawl_urls ORDER BY timestamp DESC LIMIT 1')
     result = c.fetchone()
     if result:
@@ -38,7 +39,7 @@ def fetch_latest_run_id():
 
 
 def fetch_run(run_id, page=1, page_length=default_page_length):
-    c = db.cursor()
+    c = db.connection.cursor()
     start = (page - 1) * page_length
     c.execute('SELECT * FROM crawl_urls WHERE run_id = %s AND external = 0 ORDER BY lint_critical DESC, lint_error DESC, lint_warn DESC LIMIT %s, %s',
         [run_id, start, page_length])
@@ -46,19 +47,19 @@ def fetch_run(run_id, page=1, page_length=default_page_length):
 
 
 def fetch_run_count(run_id):
-    c = db.cursor()
+    c = db.connection.cursor()
     c.execute('SELECT COUNT(id) as count FROM crawl_urls WHERE run_id = %s', [run_id])
     result = c.fetchone()
     return int(result[0]) if result else 0
 
 
 def fetch_run_ids():
-    c = db.cursor()
+    c = db.connection.cursor()
     c.execute('SELECT run_id, timestamp, domain FROM crawl_urls GROUP BY run_id ORDER BY timestamp ASC ')
     return cols_to_props(c)
 
 def fetch_url(url_id):
-    c = db.cursor()
+    c = db.connection.cursor()
     c.execute('SELECT * FROM crawl_urls WHERE id = %s', [url_id])
     return cols_to_props(c)
 
@@ -75,7 +76,7 @@ def cols_to_props(c):
     return output
 
 @app.route("/")
-def hello():
+def index():
     run_id = request.args.get('run_id', fetch_latest_run_id())
     page = int(request.args.get('page', 1))
     page_length = int(request.args.get('page_length', default_page_length))
@@ -147,10 +148,13 @@ def main():
 
     # Initialize the database cursor
     db_conf = env.get('db', {})
-    db = MySQLdb.connect(host=db_conf.get('host'), user=db_conf.get('user'),
-        passwd=db_conf.get('pass'), db=db_conf.get('name'), use_unicode=True,
-        charset='utf8')
-
+    app.config['MYSQL_HOST'] = db_conf.get('host')
+    app.config['MYSQL_USER'] = db_conf.get('user')
+    app.config['MYSQL_PASSWORD'] = db_conf.get('pass')
+    app.config['MYSQL_DB'] = db_conf.get('name')
+    app.config['MYSQL_USE_UNICODE'] = True
+    db.init_app(app)
+    
     app.run(host=args.host, port=int(args.port), debug=True)
 
 

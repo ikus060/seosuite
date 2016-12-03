@@ -44,5 +44,6 @@ setup(
         'lxml',
         'gdata',
         'flask',
+        'flask-mysqldb',
     ],
 )
