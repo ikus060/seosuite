@@ -1,7 +1,7 @@
 {% extends "common.html" %}
 {% block title %}Home{% endblock %}
 {% block content %}
-
+    <div class="pull-right"><a href="/delete?run_id={{ run_id }}" onclick="return confirm('Are you sure?')" class="btn btn-danger">Delete</a></div>
 
     <h2>Analysis Data {% if filter_lint %}<small>(filtered)</small>{% endif %}</h2>
 
