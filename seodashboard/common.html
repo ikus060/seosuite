@@ -20,7 +20,7 @@
 	{% elif lint_level.get(id) == 2 %}<span class="label label-info">Warn</span>
 	{% elif lint_level.get(id) == 3 %}<span class="label label-success">Info</span>
 	{% endif %}
-	<a href="/?run_id={{ run_id }}&filter_lint={{ key }}">{{ id }}</a> - {{ lint_desc.get(id) }}
+	<a href="/?run_id={{ run_id }}&filter_lint={{ id }}">{{ id }}</a> - {{ lint_desc.get(id) }}
 {%- endmacro %}
 
 <nav class="navbar navbar-default">
