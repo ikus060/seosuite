@@ -85,7 +85,6 @@ def index():
 
 
     crawl_urls = fetch_run(run_id, page, page_length, lint=filter_lint)
-    crawl_url_count = fetch_run_count(run_id)
     run_ids = fetch_run_ids()
 
     return render_template('index.html',
@@ -95,8 +94,7 @@ def index():
         crawl_urls=crawl_urls,
         page=page,
         prev_page=(page - 1 if page > 1 else None),
-        next_page=(page + 1 if (page + 1) < crawl_url_count / page_length else None),
-        count_page=crawl_url_count / page_length,
+        next_page=(page + 1 if len(crawl_urls) == page_length else None),
         )
 
 @app.route("/url/")

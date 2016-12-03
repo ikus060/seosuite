@@ -46,20 +46,15 @@
     </div>
 
     <nav aria-label="Page navigation" class="text-center">
-      <ul class="pagination">
+      <ul class="pager">
         <li class="{% if not prev_page %}disabled{% endif %}">
           <a href="/?run_id={{ run_id }}&page={{ prev_page }}{% if filter_lint %}&filter_lint={{ filter_lint }}{% endif %}" aria-label="Previous">
-            <span aria-hidden="true">&laquo;</span>
+            <span aria-hidden="true">&laquo;</span> Prev.
           </a>
         </li>
-        {% for i in range(1, count_page) %}
-        <li class="{% if page == i %}active{% endif %}">
-            <a href="/?run_id={{ run_id }}&page={{ i }}{% if filter_lint %}&filter_lint={{ filter_lint }}{% endif %}">{{ i }}</a>
-        </li>
-        {% endfor %}
         <li class="{% if not next_page %}disabled{% endif %}">
           <a href="/?run_id={{ run_id }}&page={{ next_page }}{% if filter_lint %}&filter_lint={{ filter_lint }}{% endif %}" aria-label="Next">
-            <span aria-hidden="true">&raquo;</span>
+            Next <span aria-hidden="true">&raquo;</span>
           </a>
         </li>
       </ul>
