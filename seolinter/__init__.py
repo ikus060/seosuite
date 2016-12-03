@@ -57,13 +57,13 @@ rules = [
     # ('W04', 'duplicate title', WARN),
     ('W06', 'meta description is too long (more then 150 chars)', WARN),
     # ('W07', 'duplicate meta description', WARN),
-    ('W08', 'meta description is too short (less then 70 chars)', WARN),
+    ('W35', 'meta description is too short (less then 50 chars)', WARN),
     ('W14', 'title matches less then three (3) heading (h1) words', WARN),
     ('W15', 'title matches less then three (3) meta description words', WARN),
     ('W16', 'too many outlinks on page (more then 300)', WARN),
     ('W18', 'page size is greater then 200K', WARN),
     ('W19', 'missing `alt` on image tags', WARN),
-    ('W23', 'too many heading (h1)', WARN),
+    ('E34', 'too many heading (h1)', ERROR),
     ('W24', 'heading structure is broken', WARN),
     ('I10', 'missing rel=prev', INFO),
     ('I11', 'missing rel=next', INFO),
@@ -238,8 +238,8 @@ def lint_html(html_string, level=INFO):
         output['E05'] = True
     elif len(p['meta_description'].get('content')) > 150:
         output['W06'] = len(p['meta_description'].get('content'))
-    elif len(p['meta_description'].get('content')) < 70:
-        output['W08'] = len(p['meta_description'].get('content'))
+    elif len(p['meta_description'].get('content')) < 50:
+        output['W35'] = len(p['meta_description'].get('content'))
 
     if not p['canonical']:
         output['E08'] = True
@@ -269,7 +269,7 @@ def lint_html(html_string, level=INFO):
         output['I21'] = p['robots']
 
     if p['h1_count'] > 1:
-        output['W23'] = p['h1_count']
+        output['E34'] = p['h1_count']
         
     if (p['h1'] < p['h2'] or
             p['h2'] < p['h3'] or
