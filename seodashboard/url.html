@@ -116,7 +116,8 @@
 		{% elif lint_level.get(key) == 2 %}<span class="label label-info">Warn</span>
 		{% elif lint_level.get(key) == 3 %}<span class="label label-success">Info</span>
 		{% endif %}
-		{{ key }} - {{ lint_desc.get(key) }}
+		<a href="/?run_id={{ run_id }}&filter_lint={{ key }}">{{ key }}</a>
+		 - {{ lint_desc.get(key) }}
 		</h4>
 		
 		{{ value }}

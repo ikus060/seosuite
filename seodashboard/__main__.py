@@ -38,11 +38,12 @@ def fetch_latest_run_id():
     return run_id
 
 
-def fetch_run(run_id, page=1, page_length=default_page_length):
+def fetch_run(run_id, page=1, page_length=default_page_length, lint=None):
+    lint = '%%%s%%' % lint if lint else '%'
     c = db.connection.cursor()
     start = (page - 1) * page_length
-    c.execute('SELECT * FROM crawl_urls WHERE run_id = %s AND external = 0 ORDER BY lint_critical DESC, lint_error DESC, lint_warn DESC LIMIT %s, %s',
-        [run_id, start, page_length])
+    c.execute('SELECT * FROM crawl_urls WHERE run_id = %s AND external = 0 AND lint_results LIKE %s ORDER BY lint_critical DESC, lint_error DESC, lint_warn DESC LIMIT %s, %s',
+        [run_id, lint, start, page_length])
     return cols_to_props(c)
 
 
@@ -78,17 +79,19 @@ def cols_to_props(c):
 @app.route("/")
 def index():
     run_id = request.args.get('run_id', fetch_latest_run_id())
+    filter_lint = request.args.get('filter_lint', None)
     page = int(request.args.get('page', 1))
     page_length = int(request.args.get('page_length', default_page_length))
 
 
-    crawl_urls = fetch_run(run_id, page, page_length)
+    crawl_urls = fetch_run(run_id, page, page_length, lint=filter_lint)
     crawl_url_count = fetch_run_count(run_id)
     run_ids = fetch_run_ids()
 
     return render_template('index.html',
         run_id=run_id,
         run_ids=run_ids,
+        filter_lint=filter_lint,
         crawl_urls=crawl_urls,
         page=page,
         prev_page=(page - 1 if page > 1 else None),
@@ -111,6 +114,7 @@ def url_page():
 
     return render_template('url.html',
         run_ids=run_ids,
+        run_id=url.get('run_id'),
         url_id=url_id,
         url=url,
         lint_results=lint_results,
