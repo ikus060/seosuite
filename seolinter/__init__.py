@@ -53,7 +53,7 @@ rules = [
     ('E12', 'title matches less then one (1) word of heading (h1)', ERROR),
     ('E13', 'title matches less then one (1) word of meta description', ERROR),
     ('E17', 'too many outlinks on page (more then 1k)', ERROR),
-    ('W03', 'title is too long (more then 58 chars)', WARN),
+    ('W03', 'title is too long (more then 70 chars)', WARN),
     # ('W04', 'duplicate title', WARN),
     ('W06', 'meta description is too long (more then 150 chars)', WARN),
     # ('W07', 'duplicate meta description', WARN),
@@ -231,7 +231,7 @@ def lint_html(html_string, level=INFO):
 
     if not p['title']:
         output['E02'] = True
-    elif len(p['title']) > 58:
+    elif len(p['title']) > 70:
         output['W03'] = len(p['title'])
 
     if not p['meta_description'] or not p['meta_description'].get("content"):
