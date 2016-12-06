@@ -69,6 +69,8 @@ rules = [
     ('I11', 'missing rel=next', INFO),
     ('I20', 'has robots=nofollow', INFO),
     ('I21', 'has robots=noindex', INFO),
+    ('C36', 'invalid HTTP response code (broken link)', CRITICAL),
+    
 
     # for robots.txt
     ('C23', 'has sitemap', CRITICAL),
@@ -219,7 +221,27 @@ def word_match_count(a, b):
                 count = count + 1
     return count
 
+
+def lint(resp):
+    """
+    Run lint on HTTP Response.
+    """
+    # Run html lint on html content
+    if resp['content_type'] == 'text/html':
+        return lint_html(resp)
+    
+    return {}
+    
+
 def lint_html(html_string, level=INFO):
+    # First parameter may be a HTTP response. Try to get it.
+    try:
+        resp = html_string
+        html_string = html_string.get('content')
+    except:
+        resp = None
+        pass
+        
     output = {}
 
     p = parse_html(html_string)
@@ -228,6 +250,9 @@ def lint_html(html_string, level=INFO):
     if not p['head']:
         output['C22'] = True
         return output
+
+    if resp and resp['code'] not in [200, 301, 302]:
+        output['C36'] = resp['code']
 
     if not p['title']:
         output['E02'] = True

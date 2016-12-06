@@ -49,73 +49,65 @@ def crawl(urls, db, internal=False, delay=0, user_agent=None,
 
         for res in results:
 
-            lint_errors = {}
-            page_details = {}
+            lint_errors, page_details, links, sources = process_html(res)
+            
+            moz_data = retrieve_mozrank(res['url'], moz_accessid, moz_secretkey)
 
-            if res['code'] == 200 and res['content_type'] == 'text/html':
+            record = store_results(db, run_id, res, lint_errors, page_details, moz_data)
+            processed_urls[url] = record
+            url_associations[url] = {}
 
-                lint_errors, page_details, links, sources = process_html(res['content'], res['url'])
-                
-                moz_data = retrieve_mozrank(res['url'], moz_accessid, moz_secretkey)
+            # Process links from the page
+            if links and len(links) > 0:
+                for link in links:
+                    link_url = link['url']
 
-                record = store_results(db, run_id, res, lint_errors, page_details, moz_data)
-                processed_urls[url] = record
-                url_associations[url] = {}
+                    if not link['valid']:
+                        # Process any malformed links
+                        bad_link = store_results(db, run_id, {
+                            'url': link_url,
+                            'code': 0,
+                            }, {}, {}, external=None)
+                        processed_urls[link_url] = bad_link
+                        associate_link(db, record, bad_link, run_id, 'anchor', link.get('text'), link.get('alt'), link.get('rel'))
+                    elif not is_internal_url(link_url, url):
+                        # Process all external links and create the
+                        if link_url not in processed_urls:
+                            link_results = retrieve_url(link_url, user_agent, False)
 
-                # Process links from the page
-                if links and len(links) > 0:
-                    for link in links:
-                        link_url = link['url']
+                            for link_result in link_results:
+                                link_store = store_results(db, run_id, link_result, {}, {}, external=True)
+                                processed_urls[link_result['url']] = link_store
 
-                        if not link['valid']:
-                            # Process any malformed links
-                            bad_link = store_results(db, run_id, {
-                                'url': link_url,
-                                'code': 0,
-                                }, {}, {}, external=None)
-                            processed_urls[link_url] = bad_link
-                            associate_link(db, record, bad_link, run_id, 'anchor', link.get('text'), link.get('alt'), link.get('rel'))
-                        elif not is_internal_url(link_url, url):
-                            # Process all external links and create the
-                            if link_url not in processed_urls:
-                                link_results = retrieve_url(link_url, user_agent, False)
-
-                                for link_result in link_results:
-                                    link_store = store_results(db, run_id, link_result, {}, {}, external=True)
-                                    processed_urls[link_result['url']] = link_store
-
-                                    # Associate links
-                                    associate_link(db, record, link_store, run_id, 'anchor', link.get('text'), link.get('alt'), link.get('rel'))
-                            else:
-                                associate_link(db, record, processed_urls[link_url], run_id, 'anchor', link.get('text'), link.get('alt'), link.get('rel'))
-
-                        elif internal and is_internal_url(link_url, url) and link_url not in processed_urls and link_url not in urls:
-                            if not limit_reached:
-                                urls.append(link_url)
-                                if limit and len(urls) >= limit:
-                                    limit_reached = True
-                            url_associations[url][link_url] = link
-
-                # Process sources from the page
-                if sources and len(sources) > 0:
-                    for source in sources:
-                        source_url = source['url']
-
-                        if source_url not in processed_urls:
-                            source_results = retrieve_url(source_url, user_agent, False)
-
-                            for source_result in source_results:
-                                source_internal = is_internal_url(source_result['url'], url)
-                                source_store = store_results(db, run_id, source_result, {}, {}, external=not source_internal)
-                                processed_urls[source_url] = source_store
-                                associate_link(db, record, source_store, run_id, 'asset', None, source.get('alt'), None)
-
+                                # Associate links
+                                associate_link(db, record, link_store, run_id, 'anchor', link.get('text'), link.get('alt'), link.get('rel'))
                         else:
-                            associate_link(db, record, processed_urls[source_url], run_id, 'asset', None, source.get('alt'), None)
+                            associate_link(db, record, processed_urls[link_url], run_id, 'anchor', link.get('text'), link.get('alt'), link.get('rel'))
 
-            else:
-                record = store_results(db, run_id, res, lint_errors, page_details, external=False)
-                processed_urls[url] = record
+                    elif internal and is_internal_url(link_url, url) and link_url not in processed_urls and link_url not in urls:
+                        if not limit_reached:
+                            urls.append(link_url)
+                            if limit and len(urls) >= limit:
+                                limit_reached = True
+                        url_associations[url][link_url] = link
+
+            # Process sources from the page
+            if sources and len(sources) > 0:
+                for source in sources:
+                    source_url = source['url']
+
+                    if source_url not in processed_urls:
+                        source_results = retrieve_url(source_url, user_agent, False)
+
+                        for source_result in source_results:
+                            source_internal = is_internal_url(source_result['url'], url)
+                            source_store = store_results(db, run_id, source_result, {}, {}, external=not source_internal)
+                            processed_urls[source_url] = source_store
+                            associate_link(db, record, source_store, run_id, 'asset', None, source.get('alt'), None)
+
+                    else:
+                        associate_link(db, record, processed_urls[source_url], run_id, 'asset', None, source.get('alt'), None)
+
 
         time.sleep(delay / 1000.0)
         urls.pop(0)
@@ -224,9 +216,12 @@ def retrieve_url(url, user_agent=None, full=True):
     return [_build_payload(res, request_time), ] + redirects
 
 
-def process_html(html, url):
+def process_html(res):
+    
+    html = res['content']
+    url = res['url']
 
-    lint_errors = seolinter.lint_html(html)
+    lint_errors = seolinter.lint(res)
 
     page_details = extract_page_details(html, url)
 
