@@ -212,4 +212,53 @@
 </div>
 </div>
 
+
+<div class="panel panel-default">
+<div class="panel-heading">
+	<h3 class="panel-title">
+		Incoming links
+	</h3>
+</div>
+<div id="fromlink" class="">
+<table class="table">
+	<thead>
+		<th>Path</th>
+		<th>Text / Label</th>
+		<th>Type</td>
+	</thead>
+    {% for l in from_links %}
+    <tr>
+	    <td><a href="/url?url_id={{ l.from_url_id }}" data-toggle="tooltip" title="{{ l.from_url_path }}">{{ l.from_url_path | truncate(50, True) }}</a></td>
+	    <td>{{ l.link_text }}</td>
+	    <td>{{ l.type }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+</div>
+
+<div class="panel panel-default">
+<div class="panel-heading">
+	<h3 class="panel-title">
+		Outgoing links
+	</h3>
+</div>
+<div id="fromlink" class="">
+<table class="table">
+	<thead>
+		<th>Path</th>
+		<th>Text / Label</th>
+		<th>Type</td>
+	</thead>
+    {% for l in to_links %}
+    <tr>
+	    <td><a href="/url?url_id={{ l.to_url_id }}" data-toggle="tooltip" title="{{ l.to_url_path }}">{{ l.to_url_path | truncate(50, True) }}</a></td>
+	    <td>{{ l.link_text }}</td>
+	    <td>{{ l.type }}</td>
+    </tr>
+    {% endfor %}
+</table>
+</div>
+</div>
+
 {% endblock %}

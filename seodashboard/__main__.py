@@ -62,10 +62,24 @@ def fetch_run_ids():
     c.execute('SELECT run_id, timestamp, domain FROM crawl_urls GROUP BY run_id ORDER BY timestamp ASC ')
     return cols_to_props(c)
 
+
 def fetch_url(url_id):
     c = db.connection.cursor()
     c.execute('SELECT * FROM crawl_urls WHERE id = %s', [url_id])
     return cols_to_props(c)
+
+
+def fetch_from_links(url_id):
+    c = db.connection.cursor()
+    c.execute('SELECT crawl_links.*,crawl_urls.path as from_url_path FROM crawl_links LEFT JOIN (crawl_urls) ON (crawl_links.from_url_id=crawl_urls.id) WHERE to_url_id = %s;', [url_id])
+    return cols_to_props(c)
+
+
+def fetch_to_links(url_id):
+    c = db.connection.cursor()
+    c.execute('SELECT crawl_links.*,crawl_urls.path as to_url_path FROM crawl_links LEFT JOIN (crawl_urls) ON (crawl_links.to_url_id=crawl_urls.id) WHERE from_url_id = %s;', [url_id])
+    return cols_to_props(c)
+
 
 def cols_to_props(c):
     output = []
@@ -105,23 +119,27 @@ def index():
 @app.route("/url/")
 def url_page():
     url_id = request.args.get('url_id', 1)
-    crawl_urls = fetch_url(url_id)
+    # Fetch all run ids.
     run_ids = fetch_run_ids()
-    
-    print [url_id]
-    
+    # Fetch details about the url
+    crawl_urls = fetch_url(url_id)
     url = crawl_urls[0]
     lint_results = json.loads(url.get('lint_results'))
-
+    # Fetch associated links.
+    from_links = fetch_from_links(url_id)
+    to_links = fetch_to_links(url_id)
+    
     return render_template('url.html',
         run_ids=run_ids,
         run_id=url.get('run_id'),
         url_id=url_id,
         url=url,
+        from_links=from_links,
+        to_links=to_links,
         lint_results=lint_results,
         lint_desc=lint_desc,
         lint_level=lint_level,
-        )
+    )
 
 @app.route("/delete/")
 def delete():
