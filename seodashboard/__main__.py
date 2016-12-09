@@ -45,7 +45,7 @@ def fetch_run(run_id, page=1, page_length=default_page_length, lint=None):
     lint = '%%%s%%' % lint if lint else '%'
     c = db.connection.cursor()
     start = (page - 1) * page_length
-    c.execute('SELECT * FROM crawl_urls WHERE run_id = %s AND external = 0 AND lint_results LIKE %s ORDER BY lint_critical DESC, lint_error DESC, lint_warn DESC LIMIT %s, %s',
+    c.execute('SELECT * FROM crawl_urls WHERE run_id = %s AND external = 0 AND lint_results LIKE %s ORDER BY lint_critical DESC, lint_error DESC, lint_warn DESC, lint_info DESC LIMIT %s, %s',
         [run_id, lint, start, page_length])
     return cols_to_props(c)
 
