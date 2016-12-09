@@ -50,11 +50,10 @@ def fetch_run(run_id, page=1, page_length=default_page_length, lint=None):
     return cols_to_props(c)
 
 
-def fetch_run_count(run_id):
+def fetch_run_stats(run_id):
     c = db.connection.cursor()
-    c.execute('SELECT COUNT(id) as count FROM crawl_urls WHERE run_id = %s', [run_id])
-    result = c.fetchone()
-    return int(result[0]) if result else 0
+    c.execute('SELECT COUNT(id) AS count, SUM(lint_critical) AS lint_critical, SUM(lint_error) AS lint_error, SUM(lint_warn) AS lint_warn, SUM(lint_info) AS lint_info FROM crawl_urls WHERE run_id = %s', [run_id])
+    return cols_to_props(c)[0]
 
 
 def fetch_run_ids():
@@ -103,6 +102,7 @@ def index():
 
     crawl_urls = fetch_run(run_id, page, page_length, lint=filter_lint)
     run_ids = fetch_run_ids()
+    crawl_stats = fetch_run_stats(run_id)
 
     return render_template('index.html',
         run_id=run_id,
@@ -111,6 +111,7 @@ def index():
         lint_desc=lint_desc,
         lint_level=lint_level,
         crawl_urls=crawl_urls,
+        crawl_stats=crawl_stats,
         page=page,
         prev_page=(page - 1 if page > 1 else None),
         next_page=(page + 1 if len(crawl_urls) == page_length else None),

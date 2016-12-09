@@ -7,7 +7,33 @@
 
     {% if filter_lint %}
     <h3>Filtered by: {{ lint(filter_lint) }}</h3>
-    {% endif %}
+	{% elif page==1 %}
+	<div class="panel panel-default">
+	<div class="panel-body">
+	<div class="row">
+		<div class="col-sm-3">
+		<!-- Info -->
+		<div class="h3">Information: <span class="label label-success">{{ crawl_stats.lint_info }}</span></div>
+		</div>
+		
+		<!-- Warning -->
+		<div class="col-sm-3">
+		<div class="h3">Warning: <span class="label label-info">{{ crawl_stats.lint_warn }}</span></div>
+		</div>
+	
+		<!-- Error -->
+		<div class="col-sm-3">
+		<div class="h3">Error: <span class="label label-warning">{{ crawl_stats.lint_error }}</span></div>
+		</div>
+	
+		<!-- Critical -->
+		<div class="col-sm-3">
+		<div class="h3">Critical: <span class="label label-danger">{{ crawl_stats.lint_critical }}</span></div>
+		</div>
+	</div>
+	</div>
+	</div>
+	{% endif %}
 
     <div class="table-responsive">
         <table class="table table-striped table-condensed ">
