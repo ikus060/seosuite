@@ -256,6 +256,10 @@ def lint_html(html_string, level=INFO):
         output['E37'] = True
         return output
 
+    # Dont' parse 302 pages
+    if resp and resp['code'] == 302:
+        return output
+
     if resp and resp['code'] not in [200, 302]:
         output['C36'] = resp['code']
         return output
