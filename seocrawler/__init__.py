@@ -55,7 +55,7 @@ def crawl(urls, db, internal=False, delay=0, user_agent=None,
 
             record = store_results(db, run_id, res, lint_errors, page_details, moz_data)
             processed_urls[url] = record
-            url_associations[url] = {}
+            url_associations.setdefault(url, {})
 
             # Process links from the page
             if links and len(links) > 0:
