@@ -69,7 +69,8 @@ rules = [
     ('I11', 'missing rel=next', INFO),
     ('I20', 'has robots=nofollow', INFO),
     ('I21', 'has robots=noindex', INFO),
-    ('C36', 'invalid HTTP response code (broken link)', CRITICAL),
+    ('C36', 'invalid HTTP response code - broken link', CRITICAL),
+    ('E37', 'page moved permanently - original page should use canonical URL', ERROR),
     
 
     # for robots.txt
@@ -251,8 +252,13 @@ def lint_html(html_string, level=INFO):
         output['C22'] = True
         return output
 
-    if resp and resp['code'] not in [200, 301, 302]:
+    if resp and resp['code'] == 301:
+        output['E37'] = True
+        return output
+
+    if resp and resp['code'] not in [200, 302]:
         output['C36'] = resp['code']
+        return output
 
     if not p['title']:
         output['E02'] = True
