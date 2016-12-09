@@ -282,11 +282,11 @@ def lint_html(html_string, level=INFO):
     if not p['h1']:
         output['E09'] = True
 
-    if not p['next']:
-        output['I10'] = True
-
-    if not p['prev']:
-        output['I11'] = True
+    # Disable rel=next and rel=prev verification since we cannot detect pagination.
+    #if not p['next']:
+    #    output['I10'] = True
+    #if not p['prev']:
+    #    output['I11'] = True
 
     if p['link_count'] >= 300:
         output['W16'] = p['link_count']
