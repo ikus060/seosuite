@@ -23,6 +23,21 @@
 	<a href="/?run_id={{ run_id }}&filter_lint={{ id }}">{{ id }}</a> - {{ lint_desc.get(id) }}
 {%- endmacro %}
 
+{% set old_page = page %}
+{% set old_order_by = order_by %}
+{% set old_page_length = page_length %}
+{% macro url_for_index(page_length=None, page=None, order_by=None) -%}
+/?run_id={{ run_id }}{% if page_length or old_page_length %}&page_length={{ page_length or old_page_length }}{% endif %}{% if page or old_page %}&page={{ page or old_page }}{% endif %}{% if filter_lint %}&filter_lint={{ filter_lint }}{% endif %}{% if order_by or old_order_by %}&order_by={{ order_by or old_order_by }}&order_by_asc={% if order_by == old_order_by %}{{ (order_by_asc + 1) % 2 }}{% else %}{{ order_by_asc or 1 }}{% endif %}{% endif %}
+{%- endmacro %}
+
+{% macro caret(order_by)%}
+{% if order_by==old_order_by %}
+{% if order_by_asc == 1 %}<span class="dropup">{% endif %}
+    <span class="caret"></span>
+{% if order_by_asc == 1 %}</span>{% endif %}
+{% endif %}
+{%- endmacro %}
+
 <nav class="navbar navbar-default">
   <div class="container">
     <!-- Brand and toggle get grouped for better mobile display -->

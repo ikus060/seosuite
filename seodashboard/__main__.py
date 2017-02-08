@@ -41,11 +41,16 @@ def fetch_latest_run_id():
     return run_id
 
 
-def fetch_run(run_id, page=1, page_length=default_page_length, lint=None):
+def fetch_run(run_id, page=1, page_length=default_page_length, lint=None, order_by=None, order_by_asc=1):
     lint = '%%%s%%' % lint if lint else '%'
     c = db.connection.cursor()
     start = (page - 1) * page_length
-    c.execute('SELECT * FROM crawl_urls WHERE run_id = %s AND external = 0 AND lint_results LIKE %s ORDER BY lint_critical DESC, lint_error DESC, lint_warn DESC, lint_info DESC LIMIT %s, %s',
+    # Define the ordering
+    order_by_sql = 'ORDER BY lint_critical DESC, lint_error DESC, lint_warn DESC, lint_info DESC'
+    if order_by is not None:
+        order_by_sql = 'ORDER BY %s %s' % (order_by, 'ASC' if order_by_asc else 'DESC')
+    
+    c.execute('SELECT * FROM crawl_urls WHERE run_id = %s AND external = 0 AND lint_results LIKE %s ' + order_by_sql + ' LIMIT %s, %s',
         [run_id, lint, start, page_length])
     return cols_to_props(c)
 
@@ -96,11 +101,13 @@ def cols_to_props(c):
 def index():
     run_id = request.args.get('run_id', fetch_latest_run_id())
     filter_lint = request.args.get('filter_lint', None)
+    order_by = request.args.get('order_by', None)
+    order_by_asc = request.args.get('order_by_asc', None) == '1'
     page = int(request.args.get('page', 1))
     page_length = int(request.args.get('page_length', default_page_length))
 
 
-    crawl_urls = fetch_run(run_id, page, page_length, lint=filter_lint)
+    crawl_urls = fetch_run(run_id, page, page_length, lint=filter_lint, order_by=order_by, order_by_asc=order_by_asc)
     run_ids = fetch_run_ids()
     crawl_stats = fetch_run_stats(run_id)
 
@@ -115,6 +122,9 @@ def index():
         page=page,
         prev_page=(page - 1 if page > 1 else None),
         next_page=(page + 1 if len(crawl_urls) == page_length else None),
+        order_by=order_by,
+        order_by_asc=order_by_asc,
+        page_length=page_length,
         )
 
 @app.route("/url/")
